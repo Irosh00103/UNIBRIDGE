@@ -1,0 +1,10 @@
+{
+  "name": "unibridge-root",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run start --prefix client\" \"npm run dev --prefix server\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

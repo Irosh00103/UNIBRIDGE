@@ -1,0 +1,122 @@
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --muted: #64748b;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(30,41,59,0.06);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.button:hover {
+  background: var(--primary-dark);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #fff;
+}
+.status-badge.OPEN { background: var(--primary); }
+.status-badge.PENDING { background: var(--warning); }
+.status-badge.SELECTED { background: var(--success); }
+.status-badge.REJECTED { background: var(--danger); }
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 1em;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+}
+.navbar-logo {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+.navbar-links {
+  display: flex;
+  gap: 24px;
+}
+.navbar-link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.navbar-link:hover {
+  color: var(--primary);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 0.95em;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+.form-success {
+  background: var(--success);
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (max-width: 1280px) {
+  .container {
+    padding: 12px;
+  }
+}
