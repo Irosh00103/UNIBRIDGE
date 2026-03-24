@@ -1,201 +1,245 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaBook, FaBriefcase, FaFileAlt, FaUsers, 
-  FaChartLine, FaCalendarAlt, FaBell, FaRocket 
-} from 'react-icons/fa';
-import { RiBarChart2Line, RiAwardLine } from 'react-icons/ri';
-import './StudentHome.css';
+import '../../styles/studentHome.css';
 
+// ========== Helper: useCounter (with cleanup) ==========
+function useCounter(target, duration = 1200) {
+  const ref = useRef(null);
+  useEffect(() => {
+    let start = 0;
+    const step = target / (duration / 16);
+    let frameId;
+
+    const update = () => {
+      start = Math.min(start + step, target);
+      if (ref.current) ref.current.textContent = Math.floor(start);
+      if (start < target) frameId = requestAnimationFrame(update);
+    };
+    frameId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frameId);
+  }, [target, duration]);
+  return ref;
+}
+
+// ========== Particle Canvas Background ==========
+function ParticleCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let particles = [];
+
+    const initParticles = (width, height) => {
+      particles = Array.from({ length: 80 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.8 + 0.5,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.4 + 0.1,
+      }));
+    };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initParticles(canvas.width, canvas.height);
+    };
+
+    const draw = () => {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(59, 130, 246, ${p.alpha})`;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      animationId = requestAnimationFrame(draw);
+    };
+
+    resize();
+    draw();
+
+    window.addEventListener('resize', resize);
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="student-canvas" />;
+}
+
+// ========== Hero Section ==========
+function Hero({ user }) {
+  const firstName = user?.name?.split(' ')[0] ?? 'Student';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+
+  return (
+    <section className="dashboard-hero fade-in-up">
+      <div className="hero-badge">
+        <span className="badge-dot"></span>
+        Student Portal
+      </div>
+      <h1 className="hero-title">
+        {greeting},{' '}
+        <span className="gradient-text">{firstName}!</span>
+      </h1>
+      <p className="hero-subtitle">
+        Your launchpad for materials, opportunities, and peer learning — all in one place.
+      </p>
+    </section>
+  );
+}
+
+// ========== Stat Card ==========
+function StatCard({ icon, value, label, delay }) {
+  const numRef = useCounter(value);
+  return (
+    <div className={`stat-card fade-in-up`} style={{ animationDelay: `${delay * 0.1}s` }}>
+      <div className="stat-icon">{icon}</div>
+      <div className="stat-number" ref={numRef}>0</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
+
+function StatGrid({ stats }) {
+  return (
+    <div className="stats-grid">
+      {stats.map((stat, idx) => (
+        <StatCard key={stat.label} {...stat} delay={idx + 1} />
+      ))}
+    </div>
+  );
+}
+
+// ========== Feature Card ==========
+function FeatureCard({ icon, title, desc, label, path, accent, delay, navigate }) {
+  return (
+    <div
+      className="feature-card fade-in-up"
+      style={{ '--card-accent': accent, animationDelay: `${delay * 0.12}s` }}
+    >
+      <div className="feature-icon">{icon}</div>
+      <div className="feature-title">{title}</div>
+      <p className="feature-desc">{desc}</p>
+      <button
+        className="feature-btn"
+        onClick={() => navigate(path)}
+        aria-label={`Go to ${title}`}
+      >
+        {label} →
+      </button>
+    </div>
+  );
+}
+
+function FeatureGrid({ features, navigate }) {
+  return (
+    <div className="features-grid">
+      {features.map((feat, idx) => (
+        <FeatureCard key={feat.title} {...feat} delay={idx + 1} navigate={navigate} />
+      ))}
+    </div>
+  );
+}
+
+// ========== Recent Activity Item ==========
+function RecentItem({ icon, title, meta, navigate, path }) {
+  return (
+    <div className="recent-item" onClick={() => navigate(path)} role="button" tabIndex={0}>
+      <div className="recent-icon">{icon}</div>
+      <div className="recent-content">
+        <h4>{title}</h4>
+        <p>{meta}</p>
+      </div>
+      <span className="recent-arrow">›</span>
+    </div>
+  );
+}
+
+function RecentActivity({ activities, navigate }) {
+  return (
+    <section className="recent-section fade-in-up">
+      <div className="recent-header">
+        <h2>⚡ Recent Activity</h2>
+        <span className="recent-badge">Live Feed</span>
+      </div>
+      <div className="recent-grid">
+        {activities.map((item) => (
+          <RecentItem key={item.title} {...item} navigate={navigate} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ========== Main Component ==========
 const StudentHome = () => {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const canvasRef = useRef(null);
-    const [stats, setStats] = useState({
-        materials: 0,
-        applications: 0,
-        kuppiSessions: 0
-    });
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-    // Animated stats (mock data – replace with API later)
-    useEffect(() => {
-        const targetStats = { materials: 24, applications: 5, kuppiSessions: 3 };
-        const duration = 2000;
-        const stepTime = 20;
-        const steps = duration / stepTime;
-        let currentStep = 0;
+  const stats = [
+    { icon: '📨', value: 5,  label: 'Applications Sent' },
+    { icon: '📚', value: 12, label: 'Materials Saved' },
+    { icon: '🎓', value: 3,  label: 'Kuppis Joined' },
+    { icon: '✅', value: 2,  label: 'Interviews Scheduled' },
+  ];
 
-        const interval = setInterval(() => {
-            if (currentStep >= steps) {
-                setStats(targetStats);
-                clearInterval(interval);
-                return;
-            }
-            currentStep++;
-            setStats({
-                materials: Math.min(targetStats.materials, Math.floor(targetStats.materials * (currentStep / steps))),
-                applications: Math.min(targetStats.applications, Math.floor(targetStats.applications * (currentStep / steps))),
-                kuppiSessions: Math.min(targetStats.kuppiSessions, Math.floor(targetStats.kuppiSessions * (currentStep / steps))),
-            });
-        }, stepTime);
+  const features = [
+    {
+      icon: '📚', title: 'Lecture Materials', accent: '#3b82f6',
+      desc: 'Browse, upload, and share study notes, slides, and resources with your batch.',
+      label: 'Explore Materials', path: '/student/materials',
+    },
+    {
+      icon: '💼', title: 'Job Board', accent: '#f59e0b',
+      desc: 'Discover internships and graduate opportunities curated for your department.',
+      label: 'Browse Jobs', path: '/student/jobs',
+    },
+    {
+      icon: '📋', title: 'My Applications', accent: '#10b981',
+      desc: 'Track every application you\'ve submitted — statuses, updates, and next steps.',
+      label: 'View Applications', path: '/student/applications',
+    },
+    {
+      icon: '🎓', title: 'Kuppi Hub', accent: '#ec489a',
+      desc: 'Organise or join peer study sessions. Collaborative learning, made easy.',
+      label: 'Open Kuppi Hub', path: '/student/kuppi',
+    },
+  ];
 
-        return () => clearInterval(interval);
-    }, []);
+  const recentActivity = [
+    { icon: '💼', title: 'Applied to Software Engineer – XYZ Ltd',   meta: '2 hours ago · Job Board',          path: '/student/applications' },
+    { icon: '📚', title: 'New material uploaded: CS3042 Lecture 7',  meta: 'Yesterday · Lecture Materials',    path: '/student/materials'    },
+    { icon: '🎓', title: 'Kuppi: Database Systems – Friday 6 PM',    meta: '2 days ago · Kuppi Hub',           path: '/student/kuppi'        },
+    { icon: '📋', title: 'Application shortlisted – ABC Company',    meta: '3 days ago · My Applications',    path: '/student/applications' },
+  ];
 
-    // Canvas background (subtle blue particles)
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let animationId;
-        let particles = [];
-
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initParticles();
-        };
-
-        const initParticles = () => {
-            particles = [];
-            const count = 80;
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 2 + 0.5,
-                    alpha: Math.random() * 0.3 + 0.1,
-                    speedX: (Math.random() - 0.5) * 0.2,
-                    speedY: (Math.random() - 0.5) * 0.2,
-                });
-            }
-        };
-
-        const drawParticles = () => {
-            if (!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(96, 165, 250, ${p.alpha})`;
-                ctx.fill();
-                p.x += p.speedX;
-                p.y += p.speedY;
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
-            });
-            animationId = requestAnimationFrame(drawParticles);
-        };
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        drawParticles();
-
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-            cancelAnimationFrame(animationId);
-        };
-    }, []);
-
-    const features = [
-        { icon: FaBook, title: 'Lecture Materials', desc: 'Browse, upload, and share notes, PDFs, and videos.', path: '/student/materials', color: '#3b82f6' },
-        { icon: FaBriefcase, title: 'Job Board', desc: 'Find internships and jobs tailored for you.', path: '/student/jobs', color: '#f59e0b' },
-        { icon: FaFileAlt, title: 'My Applications', desc: 'Track your job application status.', path: '/student/applications', color: '#10b981' },
-        { icon: FaUsers, title: 'Kuppi Hub', desc: 'Join or create peer study sessions.', path: '/student/kuppi', color: '#ef4444' },
-    ];
-
-    const recentUpdates = [
-        { icon: FaCalendarAlt, title: 'Career Fair 2026', desc: 'Join virtual career fair next week. Register now!', tag: 'New' },
-        { icon: FaBook, title: 'New Materials Uploaded', desc: '5 new resources added to Computer Science section.', tag: 'Updated' },
-        { icon: FaBell, title: 'Application Deadline', desc: 'Software Engineer internship closes in 3 days.', tag: 'Urgent' },
-    ];
-
-    return (
-        <>
-            <canvas ref={canvasRef} className="student-canvas" />
-            <div className="student-dashboard">
-                <div className="container">
-                    {/* Hero Section */}
-                    <div className="dashboard-hero fade-in-up">
-                        <div className="hero-badge">
-                            <RiBarChart2Line style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                            STUDENT DASHBOARD
-                        </div>
-                        <h1 className="hero-title">
-                            Welcome back, <span className="gradient-text">{user?.name || 'Student'}</span>!
-                        </h1>
-                        <p className="hero-subtitle">
-                            Ready to level up your university journey? Here's your command center.
-                        </p>
-                    </div>
-
-                    {/* Stats Section */}
-                    <div className="stats-grid fade-in-up delay-1">
-                        <div className="stat-card">
-                            <div className="stat-icon"><FaBook /></div>
-                            <div className="stat-number">{stats.materials}</div>
-                            <div className="stat-label">Materials Accessed</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon"><FaFileAlt /></div>
-                            <div className="stat-number">{stats.applications}</div>
-                            <div className="stat-label">Applications Sent</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon"><FaUsers /></div>
-                            <div className="stat-number">{stats.kuppiSessions}</div>
-                            <div className="stat-label">Kuppi Sessions</div>
-                        </div>
-                    </div>
-
-                    {/* Feature Cards */}
-                    <div className="features-grid fade-in-up delay-2">
-                        {features.map((feature, idx) => {
-                            const IconComponent = feature.icon;
-                            return (
-                                <div key={idx} className="feature-card" style={{ '--card-accent': feature.color }}>
-                                    <div className="feature-icon"><IconComponent /></div>
-                                    <h3 className="feature-title">{feature.title}</h3>
-                                    <p className="feature-desc">{feature.desc}</p>
-                                    <button 
-                                        className="feature-btn"
-                                        onClick={() => navigate(feature.path)}
-                                    >
-                                        Explore →
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Recent Updates */}
-                    <div className="recent-section fade-in-up delay-3">
-                        <div className="recent-header">
-                            <h2>Recent Updates</h2>
-                            <span className="recent-badge">New</span>
-                        </div>
-                        <div className="recent-grid">
-                            {recentUpdates.map((update, idx) => {
-                                const IconComponent = update.icon;
-                                return (
-                                    <div key={idx} className="recent-item">
-                                        <div className="recent-icon"><IconComponent /></div>
-                                        <div className="recent-content">
-                                            <h4>{update.title} <span className="update-tag">{update.tag}</span></h4>
-                                            <p>{update.desc}</p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
+  return (
+    <>
+      <ParticleCanvas />
+      <div className="student-dashboard">
+        <div className="container">
+          <Hero user={user} />
+          <StatGrid stats={stats} />
+          <FeatureGrid features={features} navigate={navigate} />
+          <RecentActivity activities={recentActivity} navigate={navigate} />
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default StudentHome;

@@ -1,4 +1,25 @@
-/* ===== MARVEL INSPIRED NAVBAR – BLUE & YELLOW THEME ===== */
+/* ===== MARVEL INSPIRED NAVBAR – LIGHT THEME ===== */
+
+/* Reuse the same CSS variables as the dashboard, or define them here */
+:root {
+  --marvel-blue:    #2563eb;
+  --marvel-glow:    #3b82f6;
+  --marvel-gold:    #f0b429;
+  --marvel-red:     #e62429;
+  --bg-void:        #f8fafc;
+  --bg-card:        #ffffff;
+  --bg-hover:       #eef2ff;
+  --border-dim:     rgba(37, 99, 235, 0.12);
+  --border-bright:  rgba(59, 130, 246, 0.3);
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+  --font-body:      'Rajdhani', sans-serif;
+  --font-display:   'Bebas Neue', sans-serif;
+  --shadow-sm:      0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:      0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --transition:     0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 .navbar-marvel {
   position: fixed;
@@ -6,18 +27,19 @@
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-dim);
   transition: all 0.3s ease;
   height: 70px;
+  font-family: var(--font-body);
 }
 
-/* When scrolled, make it slightly more solid */
+/* When scrolled, add a stronger shadow and slightly more solid background */
 .navbar-marvel.navbar-scrolled {
-  background: rgba(15, 23, 42, 0.95);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border-bottom-color: rgba(251, 191, 36, 0.3);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-md);
+  border-bottom-color: var(--border-bright);
 }
 
 .navbar-container {
@@ -25,9 +47,9 @@
   justify-content: space-between;
   align-items: center;
   height: 100%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 28px;
   position: relative;
 }
 
@@ -37,13 +59,10 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 26px;
-  letter-spacing: 1px;
-  background: linear-gradient(135deg, #ffffff, #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
   transition: transform 0.2s;
 }
 
@@ -52,22 +71,30 @@
 }
 
 .logo-icon {
-  font-size: 32px;
-  filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.3));
+  font-size: 30px;
+  filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.2));
+}
+
+.logo-text {
+  background: linear-gradient(135deg, var(--marvel-blue), var(--marvel-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
 }
 
 /* Desktop Links */
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   transition: all 0.3s ease;
 }
 
 .navbar-link {
   text-decoration: none;
-  color: #f1f5f9;
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: 15px;
   font-weight: 600;
   padding: 8px 0;
   position: relative;
@@ -81,8 +108,9 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #2563eb, #fbbf24);
+  background: linear-gradient(90deg, var(--marvel-blue), var(--marvel-gold));
   transition: width 0.3s ease;
+  border-radius: 2px;
 }
 
 .navbar-link:hover::after,
@@ -92,50 +120,51 @@
 
 .navbar-link:hover,
 .navbar-link.active {
-  color: #fbbf24;
+  color: var(--marvel-blue);
 }
 
 .navbar-divider {
   width: 1px;
-  height: 30px;
-  background: rgba(96, 165, 250, 0.3);
-  margin: 0 8px;
+  height: 28px;
+  background: var(--border-dim);
+  margin: 0 4px;
 }
 
 /* Buttons */
 .navbar-btn {
   padding: 8px 24px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   border-radius: 40px;
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+  background: linear-gradient(135deg, var(--marvel-blue), #1e40af);
   color: white;
   border: none;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
   text-decoration: none;
   display: inline-block;
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
 }
 
 .navbar-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, var(--marvel-glow), var(--marvel-blue));
 }
 
 .navbar-outline-btn {
   background: transparent;
-  color: #fbbf24;
-  border: 2px solid #fbbf24;
+  color: var(--marvel-blue);
+  border: 2px solid var(--marvel-blue);
   box-shadow: none;
-  background: transparent;
 }
 
 .navbar-outline-btn:hover {
-  background: rgba(251, 191, 36, 0.1);
+  background: rgba(37, 99, 235, 0.05);
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
 }
 
 /* Notification Badge */
@@ -143,20 +172,20 @@
   position: relative;
   cursor: pointer;
   font-size: 22px;
-  color: #f1f5f9;
-  transition: transform 0.2s;
+  color: var(--text-secondary);
+  transition: transform 0.2s, color 0.2s;
 }
 
 .navbar-notification:hover {
   transform: scale(1.05);
-  color: #fbbf24;
+  color: var(--marvel-blue);
 }
 
 .notification-badge {
   position: absolute;
   top: -8px;
   right: -12px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, var(--marvel-red), #dc2626);
   color: white;
   font-size: 10px;
   font-weight: bold;
@@ -166,7 +195,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.8);
+  box-shadow: 0 0 0 2px white;
 }
 
 /* Mobile Menu Toggle */
@@ -181,7 +210,7 @@
 .navbar-mobile-toggle span {
   width: 25px;
   height: 3px;
-  background: #fbbf24;
+  background: var(--marvel-blue);
   border-radius: 3px;
   transition: all 0.2s;
 }
@@ -198,16 +227,18 @@
     left: -100%;
     width: 100%;
     height: calc(100vh - 70px);
-    background: rgba(15, 23, 42, 0.98);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     gap: 20px;
-    padding: 40px 20px;
+    padding: 32px 20px;
     transition: left 0.3s ease;
     overflow-y: auto;
     z-index: 1000;
+    border-top: 1px solid var(--border-dim);
+    box-shadow: var(--shadow-md);
   }
 
   .navbar-links.active {
@@ -219,6 +250,11 @@
     padding: 12px;
     width: 100%;
     text-align: center;
+    color: var(--text-primary);
+  }
+
+  .navbar-link::after {
+    bottom: 8px;
   }
 
   .navbar-divider {
@@ -230,7 +266,7 @@
   .navbar-btn {
     width: 80%;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .navbar-outline-btn {
@@ -238,6 +274,11 @@
   }
 
   .navbar-notification {
-    margin-top: 10px;
+    margin-top: 12px;
+  }
+
+  .notification-badge {
+    right: -8px;
+    top: -6px;
   }
 }
