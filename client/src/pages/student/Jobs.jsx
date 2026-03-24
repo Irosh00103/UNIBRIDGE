@@ -24,38 +24,64 @@ const Jobs = () => {
     }, []);
 
     return (
-        <div className="container page">
-            <div className="page-header">
-                <h1>💼 Available Jobs</h1>
+        <div className="container page fade-in-up" style={{ padding: '100px 24px 60px', maxWidth: '1400px' }}>
+            <div className="page-header" style={{ marginBottom: '40px' }}>
+                <div>
+                    <h1 style={{ fontSize: '40px', fontWeight: 800, fontFamily: "'Outfit', sans-serif", color: 'var(--text-main)' }}>Job Market</h1>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Discover the latest verified internships and graduate roles.</p>
+                </div>
             </div>
 
             {error && <div className="alert alert-error">{error}</div>}
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading opportunities...</div>
             ) : jobs.length === 0 ? (
                 <div className="empty-state">
-                    <p>No jobs available right now. Check back later!</p>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>💼</div>
+                    <h3>No roles currently available</h3>
+                    <p>Check back later for new opportunities posted by our career team.</p>
                 </div>
             ) : (
                 <div className="card-grid">
-                    {jobs.map(job => (
-                        <div key={job._id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '18px' }}>{job.title}</div>
-                            <div style={{ color: 'var(--muted)', fontSize: '14px' }}>🏢 {job.employerName}</div>
-                            <div style={{ color: 'var(--text)', fontSize: '13px' }}>📅 Deadline: {new Date(job.deadline).toLocaleDateString()}</div>
-                            <div>
-                                <span className={`badge badge-${job.status.toLowerCase()}`}>{job.status}</span>
+                    {jobs.map(job => {
+                        const dl = new Date(job.deadline);
+                        const isExpired = dl < new Date();
+                        
+                        return (
+                            <div key={job._id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+                                
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                    <span className={`badge ${isExpired ? 'badge-rejected' : 'badge-open'}`}>
+                                        {isExpired ? 'CLOSED' : job.status}
+                                    </span>
+                                </div>
+                                
+                                <h3 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>{job.title}</h3>
+                                
+                                <div style={{ fontSize: '15px', color: 'var(--primary)', fontWeight: 600, marginBottom: '16px' }}>
+                                    🏢 {job.company || job.employerName}
+                                </div>
+                                
+                                <div style={{ backgroundColor: 'var(--bg-input)', padding: '12px', borderRadius: 'var(--radius-sm)', marginBottom: '24px', flexGrow: 1 }}>
+                                    {job.venue && <div style={{ color: 'var(--text-main)', fontSize: '14px', marginBottom: '8px' }}>📍 <strong>Venue:</strong> {job.venue}</div>}
+                                    <div style={{ color: 'var(--text-main)', fontSize: '14px' }}>📅 <strong>Deadline:</strong> {dl.toLocaleDateString()}</div>
+                                </div>
+                                
+                                <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
+                                    <a 
+                                        className="btn btn-outline" 
+                                        style={{ flex: 1, textAlign: 'center' }} 
+                                        href={job.applyLink} 
+                                        target="_blank" 
+                                        rel="noreferrer"
+                                    >
+                                        Visit Apply Site
+                                    </a>
+                                </div>
                             </div>
-                            <button 
-                                className="btn btn-outline btn-sm" 
-                                style={{ marginTop: 'auto' }}
-                                onClick={() => navigate(`/student/jobs/${job._id}`, { state: job })}
-                            >
-                                View & Apply →
-                            </button>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

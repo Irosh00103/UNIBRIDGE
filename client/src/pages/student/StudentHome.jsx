@@ -1,6 +1,8 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../../components/Footer';
 import '../../styles/studentHome.css';
 
 // ========== Helper: useCounter (with cleanup) ==========
@@ -238,6 +240,7 @@ const StudentHome = () => {
           <RecentActivity activities={recentActivity} navigate={navigate} />
         </div>
       </div>
+      <Footer />
     </>
   );
 };

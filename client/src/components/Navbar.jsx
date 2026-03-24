@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -9,6 +10,9 @@ const Navbar = () => {
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // Handle scroll effect for navbar background
     useEffect(() => {
@@ -28,8 +32,36 @@ const Navbar = () => {
         setMobileMenuOpen(false);
     }, [location]);
 
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            if (!user) return;
+            try {
+                const res = await axios.get('http://localhost:5000/api/notifications');
+                setNotifications(res.data.data || []);
+                setUnreadCount(res.data.unreadCount || 0);
+            } catch (err) {
+                setNotifications([]);
+                setUnreadCount(0);
+            }
+        };
+        fetchNotifications();
+    }, [user, location.pathname]);
+
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
+    };
+
+    const openNotifications = async () => {
+        setShowNotifications((prev) => !prev);
+        if (unreadCount > 0) {
+            try {
+                await axios.patch('http://localhost:5000/api/notifications/read-all');
+                setUnreadCount(0);
+                setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+            } catch (err) {
+                // no-op
+            }
+        }
     };
 
     return (
@@ -66,12 +98,26 @@ const Navbar = () => {
                                     <Link to="/student/home" className="navbar-link">Home</Link>
                                     <Link to="/student/materials" className="navbar-link">Materials</Link>
                                     <Link to="/student/materials/upload" className="navbar-link">Upload</Link>
-                                    <Link to="/student/jobs" className="navbar-link">Jobs</Link>
+                                    <Link to="/student/jobs" className="navbar-link">Job Market</Link>
                                     <Link to="/student/applications" className="navbar-link">My Applications</Link>
                                     <Link to="/student/kuppi" className="navbar-link">Kuppi</Link>
-                                    <div className="navbar-notification">
+                                    <div className="navbar-notification" onClick={openNotifications} role="button" tabIndex={0}>
                                         🔔
-                                        <span className="notification-badge">3</span>
+                                        {unreadCount > 0 && <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                        {showNotifications && (
+                                            <div className="notification-panel">
+                                                {notifications.length === 0 ? (
+                                                    <div className="notification-item muted">No notifications yet.</div>
+                                                ) : (
+                                                    notifications.slice(0, 8).map((n) => (
+                                                        <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
+                                                            <strong>{n.title}</strong>
+                                                            <div>{n.message}</div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             ) : (
@@ -80,7 +126,16 @@ const Navbar = () => {
                                     <Link to="/employer/jobs/create" className="navbar-link">Post Job</Link>
                                 </>
                             )}
-                            <button onClick={logout} className="navbar-outline-btn navbar-btn">Logout</button>
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className="profile-btn"
+                            >
+                                <div className="profile-avatar">
+                                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                                <span>{user?.name?.split(' ')[0] || 'Profile'}</span>
+                            </button>
+                            <button onClick={logout} className="btn btn-outline" style={{marginLeft: '12px'}}>Logout</button>
                         </>
                     )}
                 </div>

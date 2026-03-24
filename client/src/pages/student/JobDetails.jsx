@@ -7,7 +7,7 @@ const JobDetails = () => {
     const { id } = useParams();
     // navigate is unused but imported
     
-    const job = state || { _id: id, title: 'Job Details', employerName: 'Employer', deadline: new Date(), description: 'Loading...', status: 'OPEN' };
+    const job = state || { _id: id, title: 'Job Details', employerName: 'Employer', deadline: new Date(), description: 'Loading...', status: 'OPEN', applyLink: '#' };
 
     const [formData, setFormData] = useState({ cvLink: '', note: '' });
     const [errors, setErrors] = useState({});
@@ -87,6 +87,11 @@ const JobDetails = () => {
                 <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '15px' }}>
                     {job.description}
                 </div>
+                {job.applyLink && (
+                    <a href={job.applyLink} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
+                        Visit Official Apply Link
+                    </a>
+                )}
             </div>
 
             <div className="card">

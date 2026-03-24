@@ -24,6 +24,8 @@ import Kuppi from './pages/student/Kuppi';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
 import CreateJob from './pages/employer/CreateJob';
 import ViewApplicants from './pages/employer/ViewApplicants';
+import Profile from './pages/Profile';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 function App() {
   return (
@@ -37,6 +39,7 @@ function App() {
         
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         
         {/* Student Routes */}
         <Route path="/student/home" element={<ProtectedRoute role="student"><StudentHome /></ProtectedRoute>} />
@@ -48,9 +51,12 @@ function App() {
         <Route path="/student/kuppi" element={<ProtectedRoute role="student"><Kuppi /></ProtectedRoute>} />
         
         {/* Employer Routes */}
-        <Route path="/employer/dashboard" element={<ProtectedRoute role="employer"><EmployerDashboard /></ProtectedRoute>} />
-        <Route path="/employer/jobs/create" element={<ProtectedRoute role="employer"><CreateJob /></ProtectedRoute>} />
-        <Route path="/employer/jobs/:id/applicants" element={<ProtectedRoute role="employer"><ViewApplicants /></ProtectedRoute>} />
+        <Route path="/employer/dashboard" element={<ProtectedRoute role={['employer', 'admin']}><EmployerDashboard /></ProtectedRoute>} />
+        <Route path="/employer/jobs/create" element={<ProtectedRoute role={['employer', 'admin']}><CreateJob /></ProtectedRoute>} />
+        <Route path="/employer/jobs/:id/applicants" element={<ProtectedRoute role={['employer', 'admin']}><ViewApplicants /></ProtectedRoute>} />
+
+        {/* Admin Routes */}
+        <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

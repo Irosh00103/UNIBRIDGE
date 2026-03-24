@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         if (storedUser && storedToken) {
             setUser(JSON.parse(storedUser));
             setToken(storedToken);
+            axios.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
         }
         setLoading(false);
     }, []);
@@ -23,6 +25,7 @@ export const AuthProvider = ({ children }) => {
         setToken(userToken);
         localStorage.setItem('ub_user', JSON.stringify(userData));
         localStorage.setItem('ub_token', userToken);
+        axios.defaults.headers.common.Authorization = `Bearer ${userToken}`;
     };
 
     const logout = () => {
@@ -30,13 +33,19 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         localStorage.removeItem('ub_user');
         localStorage.removeItem('ub_token');
+        delete axios.defaults.headers.common.Authorization;
         window.location.href = '/login';
+    };
+
+    const updateUser = (nextUser) => {
+        setUser(nextUser);
+        localStorage.setItem('ub_user', JSON.stringify(nextUser));
     };
 
     if (loading) return null;
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

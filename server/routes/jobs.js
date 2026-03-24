@@ -16,14 +16,17 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        if (req.user.role !== 'employer') {
-            return res.status(403).json({ success: false, message: 'Employers only' });
+        if (!['employer', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Employers or admins only' });
         }
         
-        const { title, description, deadline } = req.body;
+        const { title, description, deadline, company, venue, applyLink } = req.body;
         
-        if (!title || !description || !deadline) {
+        if (!title || !description || !deadline || !applyLink) {
             return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+        }
+        if (!applyLink.startsWith('http')) {
+            return res.status(400).json({ success: false, message: 'Apply link must be a valid URL' });
         }
         
         const deadlineDate = new Date(deadline);
@@ -34,8 +37,11 @@ router.post('/', async (req, res) => {
         const job = await Job.create({
             employerId: req.user.id,
             employerName: req.user.name,
+            company,
             title,
             description,
+            venue,
+            applyLink,
             deadline: deadlineDate
         });
         
@@ -47,8 +53,8 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id/close', async (req, res) => {
     try {
-        if (req.user.role !== 'employer') {
-            return res.status(403).json({ success: false, message: 'Employers only' });
+        if (!['employer', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Employers or admins only' });
         }
         
         const job = await Job.findByIdAndUpdate(req.params.id, { status: 'CLOSED' }, { new: true });
