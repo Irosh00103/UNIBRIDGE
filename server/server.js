@@ -17,12 +17,18 @@ const materialRoutes = require('./routes/materials');
 const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
 const kuppiRoutes = require('./routes/kuppi');
+const notificationRoutes = require('./routes/notifications');
+const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/kuppi', kuppiRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Database connection
 mongoose.connect(process.env.MONGO_URI)

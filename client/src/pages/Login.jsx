@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import '../styles/auth.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -42,51 +43,75 @@ const Login = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
                 if (res.data.user.role === 'student') {
                     navigate('/student/home');
-                } else {
+                } else if (res.data.user.role === 'employer') {
                     navigate('/employer/dashboard');
+                } else if (res.data.user.role === 'admin') {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/'); // fallback
                 }
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid email or password');
+            setError(err.response?.data?.message || 'Failed to login');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-            <div className="card" style={{ width: '400px', padding: '32px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎓</div>
-                    <h1 style={{ color: 'var(--primary)', fontSize: '28px', fontWeight: 'bold' }}>UniBridge</h1>
-                    <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Your University Hub</p>
+        <div className="auth-bg">
+            <div className="auth-card">
+                <div className="auth-header">
+                    <div className="auth-logo">🎓</div>
+                    <h1 className="auth-title">UniBridge</h1>
+                    <div className="auth-badge">Welcome Back</div>
                 </div>
-
                 {error && <div className="alert alert-error">{error}</div>}
-
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Email</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+                        <label>Email Address</label>
+                        <input 
+                            type="email" 
+                            value={email} 
+                            onChange={e => setEmail(e.target.value)} 
+                            placeholder="you@example.com"
+                            className={emailErr ? 'error' : ''}
+                        />
                         {emailErr && <span className="error-text">{emailErr}</span>}
                     </div>
-                    <div className="form-group" style={{ marginBottom: '24px' }}>
+                    <div className="form-group">
                         <label>Password</label>
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+                        <input 
+                            type="password" 
+                            value={password} 
+                            onChange={e => setPassword(e.target.value)} 
+                            placeholder="••••••"
+                            className={passErr ? 'error' : ''}
+                        />
                         {passErr && <span className="error-text">{passErr}</span>}
                     </div>
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '16px' }} disabled={loading}>
-                        {loading ? 'Loading...' : 'Login'}
+                    <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
-
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <button type="button" className="btn btn-ghost btn-sm" style={{ flex: 1 }} onClick={() => { setEmail('student@test.com'); setPassword('test123'); setPassErr(''); setEmailErr(''); }}>
-                        👩‍🎓 Fill as Student
+                <div className="auth-demo-buttons">
+                    <button 
+                        type="button" 
+                        className="auth-btn-outline" 
+                        onClick={() => { setEmail('student@test.com'); setPassword('test123'); setPassErr(''); setEmailErr(''); }}
+                    >
+                        👩‍🎓 Student Demo
                     </button>
-                    <button type="button" className="btn btn-ghost btn-sm" style={{ flex: 1 }} onClick={() => { setEmail('employer@test.com'); setPassword('test123'); setPassErr(''); setEmailErr(''); }}>
-                        🏢 Fill as Employer
+                    <button 
+                        type="button" 
+                        className="auth-btn-outline" 
+                        onClick={() => { setEmail('employer@test.com'); setPassword('test123'); setPassErr(''); setEmailErr(''); }}
+                    >
+                        🏢 Employer Demo
                     </button>
+                </div>
+                <div className="auth-footer">
+                    Don't have an account? <Link to="/register">Sign up now</Link>
                 </div>
             </div>
         </div>

@@ -9,7 +9,8 @@ const ProtectedRoute = ({ children, role }) => {
         return <Navigate to="/login" />;
     }
     
-    if (role && user.role !== role) {
+    const allowedRoles = Array.isArray(role) ? role : role ? [role] : [];
+    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
         return (
             <div className="container page empty-state">
                 <p>Access Denied. You do not have permission to view this page.</p>

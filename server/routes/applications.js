@@ -66,8 +66,8 @@ router.get('/mine', async (req, res) => {
 
 router.get('/job/:jobId', async (req, res) => {
     try {
-        if (req.user.role !== 'employer') {
-            return res.status(403).json({ success: false, message: 'Employers only' });
+        if (!['employer', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Employers or admins only' });
         }
         
         const applications = await Application.find({ jobId: req.params.jobId });
@@ -79,8 +79,8 @@ router.get('/job/:jobId', async (req, res) => {
 
 router.patch('/:id/status', async (req, res) => {
     try {
-        if (req.user.role !== 'employer') {
-            return res.status(403).json({ success: false, message: 'Employers only' });
+        if (!['employer', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Employers or admins only' });
         }
         
         const { status } = req.body;

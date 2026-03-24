@@ -1,153 +1,281 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import '../../styles/kuppi.css';
+
+const API = 'http://localhost:5000/api/kuppi';
 
 const Kuppi = () => {
-    const [sessions, setSessions] = useState([]);
+    const { user } = useAuth();
+    const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [pageError, setPageError] = useState('');
+    const [error, setError] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+    const [showForm, setShowForm] = useState(false);
+    const [commentText, setCommentText] = useState({});
+    const [formData, setFormData] = useState({
+        title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
+    });
 
-    const [formData, setFormData] = useState({ title: '', module: '', date: '', description: '' });
-    const [formErrors, setFormErrors] = useState({});
-    const [successMsg, setSuccessMsg] = useState('');
-    const [apiError, setApiError] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-    const fetchSessions = async () => {
+    const fetchPosts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/kuppi');
-            setSessions(res.data.data);
+            setLoading(true);
+            const res = await axios.get(`${API}/posts`);
+            setPosts(res.data.data || []);
         } catch (err) {
-            setPageError('Failed to load sessions');
+            setError(err.response?.data?.message || 'Failed to load kuppi posts');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchSessions();
+        fetchPosts();
     }, []);
 
-    const validate = () => {
-        let tempErrors = {};
-        if (!formData.title) tempErrors.title = 'Title is required';
-        if (!formData.module) tempErrors.module = 'Module is required';
-        if (!formData.date) {
-            tempErrors.date = 'Date is required';
-        } else {
-            const sessionDate = new Date(formData.date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            if (sessionDate < today) {
-                tempErrors.date = 'Session date must be in the future';
-            }
-        }
-        setFormErrors(tempErrors);
-        return Object.keys(tempErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
+    const createPost = async (e) => {
         e.preventDefault();
-        setSuccessMsg('');
-        setApiError('');
-        
-        if (!validate()) return;
-        
-        setSubmitting(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/kuppi', formData);
-            if (res.data.success) {
-                setSuccessMsg('Session created successfully! ✅');
-                setFormData({ title: '', module: '', date: '', description: '' });
-                setFormErrors({});
-                fetchSessions(); // Refresh list
-            }
+            await axios.post(`${API}/posts`, { ...formData, date: `${formData.date}T${formData.time || '12:00'}:00` });
+            setFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
+            setShowForm(false);
+            fetchPosts();
         } catch (err) {
-            setApiError(err.response?.data?.message || 'Failed to create session');
-        } finally {
-            setSubmitting(false);
+            setError(err.response?.data?.message || 'Failed to create post');
         }
     };
 
-    const handleFillSample = () => {
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + 7);
-        const formattedDate = futureDate.toISOString().split('T')[0];
-
-        setFormData({
-            title: "Software Engineering Finals Prep",
-            module: "IT3010",
-            date: formattedDate,
-            description: "Covering UML diagrams and design patterns"
-        });
-        setFormErrors({});
+    const doAction = async (postId, action) => {
+        try {
+            await axios.post(`${API}/posts/${postId}/${action}`);
+            fetchPosts();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Action failed');
+        }
     };
+
+    const postComment = async (postId) => {
+        const text = (commentText[postId] || '').trim();
+        if (!text) return;
+        try {
+            await axios.post(`${API}/posts/${postId}/comments`, { text });
+            setCommentText((prev) => ({ ...prev, [postId]: '' }));
+            fetchPosts();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Comment failed');
+        }
+    };
+
+    const downloadApplicants = async (postId) => {
+        try {
+            const res = await axios.get(`${API}/posts/${postId}/applicants/export`, { responseType: 'blob' });
+            // Now downloading an xlsx file from the backend!
+            const url = URL.createObjectURL(new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kuppi-${postId}-applicants.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Export failed');
+        }
+    };
+
+    const sortedPosts = [...posts].sort((a, b) => {
+        if (sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+        if (sortBy === 'likes') return (b.likes?.length || 0) - (a.likes?.length || 0);
+        return new Date(a.date) - new Date(b.date);
+    });
 
     return (
-        <div className="container page">
-            <div className="page-header">
-                <h1>🎓 Upcoming Sessions</h1>
-            </div>
-
-            {pageError && <div className="alert alert-error">{pageError}</div>}
-
-            {loading ? (
-                <div className="loading">Loading...</div>
-            ) : sessions.length === 0 ? (
-                <div className="empty-state">
-                    <p>No upcoming sessions.</p>
+        <div className="kuppi-container fade-in-up">
+            <div className="kuppi-header">
+                <div>
+                    <h1 className="kuppi-title">Kuppi Hub</h1>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Join or host peer study sessions to conquer your modules together.</p>
                 </div>
-            ) : (
-                <div className="card-grid" style={{ marginBottom: '40px' }}>
-                    {sessions.map(session => (
-                        <div key={session._id} className="card" style={{ background: 'var(--primary-light)', borderColor: '#bfdbfe', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{session.title}</div>
-                            <div style={{ color: 'var(--text)', fontSize: '14px' }}>📚 {session.module}</div>
-                            <div style={{ color: 'var(--text)', fontSize: '14px' }}>📅 {new Date(session.date).toLocaleDateString()}</div>
-                            <div style={{ color: 'var(--muted)', fontSize: '13px' }}>👤 Hosted by {session.studentName}</div>
-                            {session.description && <div style={{ fontSize: '13px', marginTop: '8px' }}>{session.description}</div>}
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            <div className="page-header">
-                <h2>Create a Session</h2>
+                <button className={`btn ${showForm ? 'btn-outline' : 'btn-primary'} create-btn`} onClick={() => setShowForm((p) => !p)}>
+                    {showForm ? 'Cancel' : '+ Host a Kuppi'}
+                </button>
             </div>
             
-            <div className="card" style={{ maxWidth: '600px' }}>
-                <button type="button" className="fill-btn" onClick={handleFillSample}>Fill Sample Data</button>
-                
-                {successMsg && <div className="alert alert-success">{successMsg}</div>}
-                {apiError && <div className="alert alert-error">{apiError}</div>}
-
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Title</label>
-                        <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
-                        {formErrors.title && <span className="error-text">{formErrors.title}</span>}
-                    </div>
-                    <div className="form-group">
-                        <label>Module</label>
-                        <input type="text" value={formData.module} onChange={e => setFormData({...formData, module: e.target.value})} placeholder="e.g. IT3040" />
-                        {formErrors.module && <span className="error-text">{formErrors.module}</span>}
-                    </div>
-                    <div className="form-group">
-                        <label>Date</label>
-                        <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
-                        {formErrors.date && <span className="error-text">{formErrors.date}</span>}
-                    </div>
-                    <div className="form-group" style={{ marginBottom: '24px' }}>
-                        <label>Description (Optional)</label>
-                        <textarea 
-                            value={formData.description} 
-                            onChange={e => setFormData({...formData, description: e.target.value})}
-                        ></textarea>
-                    </div>
-                    <button type="submit" className="btn btn-primary" disabled={submitting}>
-                        {submitting ? 'Creating...' : 'Create Session'}
-                    </button>
-                </form>
+            {error && <div className="alert alert-error">{error}</div>}
+            
+            {showForm && (
+                <div className="create-post-card">
+                    <h2 style={{ marginBottom: '24px', color: 'var(--text-main)' }}>Host a Study Session</h2>
+                    <form onSubmit={createPost}>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Session Title</label>
+                                <input required placeholder="e.g. Midterm Physics Review" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Module</label>
+                                <input required placeholder="e.g. PHY101" value={formData.module} onChange={(e) => setFormData({ ...formData, module: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Date</label>
+                                <input required type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Time</label>
+                                <input required type="time" value={formData.time} onChange={(e) => setFormData({ ...formData, time: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Location / Link</label>
+                                <input placeholder="Zoom link or Room C302" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Max Participants (Optional)</label>
+                                <input type="number" placeholder="e.g. 10" value={formData.maxParticipants} onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })} />
+                            </div>
+                        </div>
+                        <div className="form-group" style={{ marginTop: '16px' }}>
+                            <label>Description</label>
+                            <textarea required placeholder="What topics will be covered?" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+                            <button className="btn btn-primary" type="submit" style={{ padding: '12px 32px' }}>Publish Kuppi</button>
+                        </div>
+                    </form>
+                </div>
+            )}
+            
+            <div className="sorting-bar">
+                <button className={`sort-btn ${sortBy === 'newest' ? 'active' : ''}`} onClick={() => setSortBy('newest')}>Newest Posted</button>
+                <button className={`sort-btn ${sortBy === 'upcoming' ? 'active' : ''}`} onClick={() => setSortBy('upcoming')}>Upcoming Sessions</button>
+                <button className={`sort-btn ${sortBy === 'likes' ? 'active' : ''}`} onClick={() => setSortBy('likes')}>Most Liked</button>
             </div>
+            
+            {loading ? <div className="loading">Loading sessions...</div> : (
+                <div className="posts-grid">
+                    {sortedPosts.length === 0 && !error && (
+                        <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+                            <h3>No sessions found</h3>
+                            <p>Be the first to host a Kuppi session!</p>
+                        </div>
+                    )}
+                    
+                    {sortedPosts.map((post) => {
+                        const isOwner = post.student?._id === user?.id;
+                        const dateObj = new Date(post.date);
+                        
+                        return (
+                            <div className="post-card" key={post._id}>
+                                <div className="post-header">
+                                    <div className="post-author">
+                                        <div className="author-pic">
+                                            {post.student?.name?.charAt(0).toUpperCase() || 'U'}
+                                        </div>
+                                        <div className="author-meta">
+                                            <span className="author-name">{post.student?.name || 'Unknown Student'}</span>
+                                            <span className="post-time">Posted {new Date(post.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                    <div className="badge badge-open">Open</div>
+                                </div>
+                                
+                                <h3 className="post-title">{post.title}</h3>
+                                
+                                <div className="post-tags">
+                                    <span className="badge badge-type">{post.module}</span>
+                                    {post.maxParticipants && (
+                                        <span className="badge badge-type">Max: {post.maxParticipants}</span>
+                                    )}
+                                </div>
+                                
+                                <p className="post-desc">{post.description}</p>
+                                
+                                <div className="post-details">
+                                    <div className="detail-row">
+                                        <span className="detail-icon">📅</span>
+                                        {dateObj.toLocaleDateString()} at {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-icon">📍</span>
+                                        {post.location || 'TBA'}
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-icon">👥</span>
+                                        {post.participants?.length || 0} / {post.maxParticipants || 'Unlimited'} Participants
+                                    </div>
+                                </div>
+                                
+                                <div className="post-actions">
+                                    <button 
+                                        className={`action-btn ${post.userLiked ? 'active-like' : ''}`} 
+                                        onClick={() => doAction(post._id, 'like')}
+                                    >
+                                        👍 {post.likes?.length || 0}
+                                    </button>
+                                    <button 
+                                        className={`action-btn ${post.userDisliked ? 'active-dislike' : ''}`} 
+                                        onClick={() => doAction(post._id, 'dislike')}
+                                    >
+                                        👎 {post.dislikes?.length || 0}
+                                    </button>
+                                </div>
+                                
+                                <div className="join-btn-container">
+                                    {isOwner ? (
+                                        <>
+                                            <button className="btn btn-primary btn-join" disabled style={{ cursor: 'not-allowed', opacity: 0.7 }}>
+                                                Your Session
+                                            </button>
+                                            <button className="btn btn-download" onClick={() => downloadApplicants(post._id)} title="Export Applicants as Excel">
+                                                📊 Export .xlsx
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button 
+                                            className={`btn ${post.userJoined ? 'btn-danger' : 'btn-primary'} btn-join`} 
+                                            onClick={() => doAction(post._id, 'join')}
+                                        >
+                                            {post.userJoined ? 'Leave Session' : 'Apply / Join'}
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                <hr style={{ marginTop: '24px', marginBottom: '16px', border: 'none', borderTop: '1px solid var(--border-light)' }} />
+                                
+                                <div className="comments-section">
+                                    <h4 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--text-main)' }}>Comments ({post.comments?.length || 0})</h4>
+                                    
+                                    {post.comments?.length > 0 && (
+                                        <div className="comment-list">
+                                            {post.comments.map((c) => (
+                                                <div className="comment-item" key={c._id}>
+                                                    <div className="comment-avatar">
+                                                        {c.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
+                                                    <div className="comment-content">
+                                                        <div className="comment-author">{c.user?.name || 'User'}</div>
+                                                        <div className="comment-text">{c.text}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="comment-input-area">
+                                        <input 
+                                            className="comment-input" 
+                                            placeholder="Add a comment..." 
+                                            value={commentText[post._id] || ''} 
+                                            onChange={(e) => setCommentText((prev) => ({ ...prev, [post._id]: e.target.value }))}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') postComment(post._id); }}
+                                        />
+                                        <button className="btn btn-primary btn-sm" style={{ borderRadius: 'var(--radius-full)' }} onClick={() => postComment(post._id)}>Reply</button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
