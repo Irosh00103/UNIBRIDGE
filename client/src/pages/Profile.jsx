@@ -40,7 +40,7 @@ const Profile = () => {
         try {
             const payload = { ...form };
             if (!payload.password) delete payload.password;
-            
+
             const res = await axios.put('http://localhost:5000/api/users/me', payload);
             updateUser({ ...user, ...res.data.data }); // update context
             setForm((prev) => ({ ...prev, password: '' })); // clear password field
@@ -87,7 +87,7 @@ const Profile = () => {
             </div>
 
             <div className="card" style={{ padding: '40px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid var(--border-light)' }}>
                     <div style={{
                         width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
@@ -110,13 +110,13 @@ const Profile = () => {
                         <label>Full Name</label>
                         <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your full name" required />
                     </div>
-                    
+
                     <div className="form-group" style={{ marginBottom: '24px' }}>
                         <label>Bio (About Me)</label>
-                        <textarea 
-                            value={form.bio} 
-                            onChange={(e) => setForm({ ...form, bio: e.target.value })} 
-                            placeholder="Tell your peers a bit about yourself, your major, interests..." 
+                        <textarea
+                            value={form.bio}
+                            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                            placeholder="Tell your peers a bit about yourself, your major, interests..."
                             style={{ minHeight: '100px' }}
                         />
                     </div>
@@ -129,7 +129,7 @@ const Profile = () => {
                     <div className="form-group" style={{ marginBottom: '32px' }}>
                         <label>New Password (Leave blank to keep current)</label>
                         <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
-                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Required length > 5 characters if updating.</span>
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Required length &gt;= 5 characters if updating.</span>
                     </div>
 
                     <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '16px', fontSize: '16px' }}>
