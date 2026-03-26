@@ -36,9 +36,18 @@ const Navbar = () => {
         const fetchNotifications = async () => {
             if (!user) return;
             try {
-                const res = await axios.get('http://localhost:5000/api/notifications');
-                setNotifications(res.data.data || []);
-                setUnreadCount(res.data.unreadCount || 0);
+                let res;
+                try {
+                    res = await axios.get('http://localhost:5000/api/notifications');
+                    setNotifications(res.data.data || []);
+                    setUnreadCount(res.data.unreadCount || 0);
+                    return;
+                } catch (legacyErr) {
+                    res = await axios.get('http://localhost:5000/api/uni/notifications');
+                }
+                const list = Array.isArray(res.data) ? res.data : [];
+                setNotifications(list);
+                setUnreadCount(list.filter((n) => !n.isRead).length);
             } catch (err) {
                 setNotifications([]);
                 setUnreadCount(0);
@@ -55,7 +64,11 @@ const Navbar = () => {
         setShowNotifications((prev) => !prev);
         if (unreadCount > 0) {
             try {
-                await axios.patch('http://localhost:5000/api/notifications/read-all');
+                try {
+                    await axios.patch('http://localhost:5000/api/notifications/read-all');
+                } catch (legacyErr) {
+                    await axios.put('http://localhost:5000/api/uni/notifications/read-all');
+                }
                 setUnreadCount(0);
                 setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
             } catch (err) {
@@ -68,7 +81,7 @@ const Navbar = () => {
         <nav className={`navbar-marvel ${scrolled ? 'navbar-scrolled' : ''}`}>
             <div className="navbar-container">
                 <Link
-                    to={user ? (user.role === 'student' ? '/student/home' : '/admin/dashboard') : '/'}
+                    to={user ? (user.role === 'student' ? '/student/home' : user.role === 'employer' ? '/employer/dashboard' : '/admin/dashboard') : '/'}
                     className="navbar-logo"
                 >
                     <span className="logo-icon">🎓</span>
@@ -98,7 +111,8 @@ const Navbar = () => {
                                     <Link to="/" className="navbar-link">Home</Link>
                                     <Link to="/student/materials" className="navbar-link">Materials</Link>
                                     <Link to="/student/materials/upload" className="navbar-link">Upload</Link>
-                                    <Link to="/student/jobs" className="navbar-link">Job Market</Link>
+                                    <Link to="/student/job-portal" className="navbar-link">Job Portal</Link>
+                                    <Link to="/student/job-portal/saved" className="navbar-link">Saved Jobs</Link>
                                     <Link to="/student/kuppi" className="navbar-link">Kuppi</Link>
                                     <div className="navbar-notification" onClick={openNotifications} role="button" tabIndex={0}>
                                         🔔
@@ -126,7 +140,7 @@ const Navbar = () => {
                                 </>
                             )}
                             <button
-                                onClick={() => navigate(user?.role === 'student' ? '/student/home' : '/admin/dashboard')}
+                                onClick={() => navigate(user?.role === 'student' ? '/student/home' : user?.role === 'employer' ? '/employer/dashboard' : '/admin/dashboard')}
                                 className="profile-btn"
                                 title="Go to Dashboard"
                             >

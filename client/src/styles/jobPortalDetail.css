@@ -1,0 +1,70 @@
+/* ── Job Detail Page ── */
+.jp-detail { padding: 100px 24px 60px; max-width: 1000px; margin: 0 auto; }
+
+.jp-back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 14px; font-weight: 500; text-decoration: none; margin-bottom: 24px; transition: color var(--transition-fast); }
+.jp-back-link:hover { color: var(--primary); }
+
+.jp-detail-header {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px;
+}
+.jp-detail-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.jp-detail-title { font-size: 28px; font-weight: 800; font-family: 'Outfit', sans-serif; margin-bottom: 8px; }
+.jp-detail-company { font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 16px; }
+.jp-detail-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.jp-detail-meta .jp-meta-tag { font-size: 13px; padding: 6px 14px; }
+
+.jp-detail-overview { font-size: 15px; line-height: 1.7; color: var(--text-main); white-space: pre-wrap; }
+
+/* Sections */
+.jp-detail-section {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 28px; margin-bottom: 24px;
+}
+.jp-detail-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; font-family: 'Outfit', sans-serif; }
+.jp-detail-section ul { list-style: none; padding: 0; }
+.jp-detail-section ul li {
+  position: relative; padding: 8px 0 8px 20px; font-size: 14px; line-height: 1.6; color: var(--text-main);
+}
+.jp-detail-section ul li::before {
+  content: '▸'; position: absolute; left: 0; color: var(--primary); font-weight: 700;
+}
+
+/* Skills */
+.jp-detail-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Screening Form */
+.jp-screening { margin-top: 8px; }
+.jp-screening-question {
+  margin-bottom: 24px; padding: 20px; background: var(--bg-input);
+  border-radius: var(--radius-md);
+}
+.jp-screening-question label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text-main); }
+.jp-screening-question textarea {
+  width: 100%; min-height: 80px; padding: 12px; border: 2px solid transparent;
+  border-radius: var(--radius-md); font-size: 14px; background: var(--bg-card);
+  resize: vertical; outline: none; transition: border-color var(--transition-fast);
+  font-family: 'Inter', sans-serif;
+}
+.jp-screening-question textarea:focus { border-color: var(--primary); }
+.jp-screening-question select {
+  width: 100%; padding: 12px; border: 2px solid transparent;
+  border-radius: var(--radius-md); font-size: 14px; background: var(--bg-card);
+  outline: none; cursor: pointer;
+}
+.jp-screening-question select:focus { border-color: var(--primary); }
+
+/* Action Buttons */
+.jp-detail-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+/* Applied Badge */
+.jp-applied-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
+  background: var(--success-light); color: var(--success);
+  border-radius: var(--radius-full); font-weight: 700; font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .jp-detail-title { font-size: 22px; }
+  .jp-detail-header { padding: 20px; }
+}

@@ -196,11 +196,10 @@ function RecentActivity({ activities, navigate }) {
 const StudentHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
   const stats = [
     { icon: '📚', value: 12, label: 'Materials Saved' },
     { icon: '🎓', value: 3,  label: 'Kuppis Joined' },
-    { icon: '✅', value: 2,  label: 'Interviews Scheduled' },
+    { icon: '🔖', value: 2,  label: 'Saved Jobs' },
   ];
 
   const features = [
@@ -210,14 +209,19 @@ const StudentHome = () => {
       label: 'Explore Materials', path: '/student/materials',
     },
     {
-      icon: '💼', title: 'Job Board', accent: '#f59e0b',
-      desc: 'Discover internships and graduate opportunities curated for your department.',
-      label: 'Browse Jobs', path: '/student/jobs',
+      icon: '💼', title: 'Job Portal', accent: '#f59e0b',
+      desc: 'Discover internships, graduate roles, and career opportunities curated for students.',
+      label: 'Browse Jobs', path: '/student/job-portal',
     },
     {
       icon: '🎓', title: 'Kuppi Hub', accent: '#ec489a',
       desc: 'Organise or join peer study sessions. Collaborative learning, made easy.',
       label: 'Open Kuppi Hub', path: '/student/kuppi',
+    },
+    {
+      icon: '🔖', title: 'Saved Jobs', accent: '#10b981',
+      desc: 'Keep track of job opportunities you are interested in and apply later.',
+      label: 'View Saved', path: '/student/job-portal/saved',
     },
   ];
 

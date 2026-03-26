@@ -5,6 +5,7 @@ const Material = require('../models/Material');
 const Kuppi = require('../models/Kuppi');
 const User = require('../models/User');
 const Application = require('../models/Application');
+const SavedJob = require('../models/SavedJob');
 const { protect } = require('../middleware/auth');
 
 router.use(protect);
@@ -19,17 +20,18 @@ router.use((req, res, next) => {
 // Analytics
 router.get('/analytics', async (req, res) => {
     try {
-        const [users, students, jobs, applications, materials, kuppis] = await Promise.all([
+        const [users, students, jobs, applications, materials, kuppis, savedJobs] = await Promise.all([
             User.countDocuments(),
             User.countDocuments({ role: 'student' }),
             Job.countDocuments(),
             Application.countDocuments(),
             Material.countDocuments(),
-            Kuppi.countDocuments()
+            Kuppi.countDocuments(),
+            SavedJob.countDocuments()
         ]);
         res.json({
             success: true,
-            data: { users, students, employers: users - students - 1, jobs, applications, materials, kuppis }
+            data: { users, students, employers: users - students - 1, jobs, applications, materials, kuppis, savedJobs }
         });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -77,8 +79,21 @@ router.get('/jobs', async (req, res) => {
 
 router.put('/jobs/:id', async (req, res) => {
     try {
-        const { title, company, status, deadline, applyLink, venue } = req.body;
-        const job = await Job.findByIdAndUpdate(req.params.id, { title, company, status, deadline, applyLink, venue }, { new: true, runValidators: true });
+        const {
+            title, company, status, deadline, applyLink, venue,
+            location, type, salary, category, portalCategory, workMode,
+            experience, qualification, sideSummary, overview, description,
+            responsibilities, requirements, skills, screeningQuestions, logo
+        } = req.body;
+        const update = {
+            title, company, status, deadline, applyLink, venue,
+            location, type, salary, category, portalCategory, workMode,
+            experience, qualification, sideSummary, overview, description,
+            responsibilities, requirements, skills, screeningQuestions, logo
+        };
+        // Remove undefined keys
+        Object.keys(update).forEach(k => update[k] === undefined && delete update[k]);
+        const job = await Job.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
         res.json({ success: true, data: job });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

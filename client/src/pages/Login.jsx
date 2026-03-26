@@ -16,6 +16,16 @@ const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+    const normalizeLoginResponse = (data) => {
+        if (data?.success) {
+            return { ok: true, token: data.token, user: data.user };
+        }
+        if (data?.token && data?.user) {
+            return { ok: true, token: data.token, user: data.user };
+        }
+        return { ok: false };
+    };
+
     const validate = () => {
         let isValid = true;
         if (!email) { setEmailErr('Email is required'); isValid = false; }
@@ -37,19 +47,29 @@ const Login = () => {
         
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-            if (res.data.success) {
-                login(res.data.user, res.data.token);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-                if (res.data.user.role === 'student') {
+            let authData;
+            try {
+                const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+                authData = normalizeLoginResponse(res.data);
+            } catch (primaryErr) {
+                const res = await axios.post('http://localhost:5000/api/uni/auth/login', { email, password });
+                authData = normalizeLoginResponse(res.data);
+            }
+
+            if (authData?.ok) {
+                login(authData.user, authData.token);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${authData.token}`;
+                if (authData.user.role === 'student') {
                     navigate('/student/home');
-                } else if (res.data.user.role === 'employer') {
+                } else if (authData.user.role === 'employer') {
                     navigate('/employer/dashboard');
-                } else if (res.data.user.role === 'admin') {
+                } else if (authData.user.role === 'admin') {
                     navigate('/admin/dashboard');
                 } else {
                     navigate('/'); // fallback
                 }
+            } else {
+                setError('Failed to login');
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to login');

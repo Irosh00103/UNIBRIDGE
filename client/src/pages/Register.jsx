@@ -24,6 +24,7 @@ const Register = () => {
         
         if (!formData.password) { tempErrors.password = 'Password is required'; isValid = false; }
         else if (formData.password.length < 6) { tempErrors.password = 'Minimum 6 characters required'; isValid = false; }
+        if (!formData.role) { tempErrors.role = 'Role is required'; isValid = false; }
 
         setErrors(tempErrors);
         return isValid;
@@ -37,11 +38,26 @@ const Register = () => {
         
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/register', formData);
-            if (res.data.success) {
-                login(res.data.user, res.data.token);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-                if (res.data.user.role === 'student') {
+            let res;
+            if (formData.role === 'employer') {
+                res = await axios.post('http://localhost:5000/api/uni/auth/register/employer', {
+                    email: formData.email,
+                    password: formData.password,
+                    companyName: formData.name,
+                });
+            } else {
+                res = await axios.post('http://localhost:5000/api/auth/register', formData);
+            }
+
+            const token = res.data?.token;
+            const user = res.data?.user;
+            const isLegacySuccess = res.data?.success && token && user;
+            const isUniSuccess = token && user;
+
+            if (isLegacySuccess || isUniSuccess) {
+                login(user, token);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                if (user.role === 'student') {
                     navigate('/student/home');
                 } else {
                     navigate('/employer/dashboard');
@@ -97,7 +113,18 @@ const Register = () => {
                         />
                         {errors.password && <span className="error-text">{errors.password}</span>}
                     </div>
-                    {/* Registration is now exclusively for standard Student accounts */}
+                    <div className="form-group">
+                        <label>Account Type</label>
+                        <select
+                            value={formData.role}
+                            onChange={e => setFormData({ ...formData, role: e.target.value })}
+                            className={errors.role ? 'error' : ''}
+                        >
+                            <option value="student">Student</option>
+                            <option value="employer">Employer</option>
+                        </select>
+                        {errors.role && <span className="error-text">{errors.role}</span>}
+                    </div>
                     <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>

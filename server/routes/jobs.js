@@ -2,7 +2,19 @@ const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
 const { protect } = require('../middleware/auth');
+const { mapJobToPortalCategory } = require('../utils/jobCategoryMapper');
 
+// ── PUBLIC: Get all portal jobs (no auth needed for browsing) ──
+router.get('/portal', async (req, res) => {
+    try {
+        const jobs = await Job.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: jobs });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ── Protected routes below ──
 router.use(protect);
 
 router.get('/', async (req, res) => {
@@ -20,19 +32,19 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Admins only' });
         }
         
-        const { title, description, deadline, company, venue, applyLink } = req.body;
+        const {
+            title, description, deadline, company, venue, applyLink,
+            location, type, salary, category, workMode, experience,
+            qualification, sideSummary, overview, postedDate,
+            responsibilities, requirements, skills, screeningQuestions, logo
+        } = req.body;
         
-        if (!title || !description || !deadline || !applyLink) {
-            return res.status(400).json({ success: false, message: 'Please provide all required fields' });
-        }
-        if (!applyLink.startsWith('http')) {
-            return res.status(400).json({ success: false, message: 'Apply link must be a valid URL' });
+        if (!title || !description) {
+            return res.status(400).json({ success: false, message: 'Title and description are required' });
         }
         
-        const deadlineDate = new Date(deadline);
-        if (deadlineDate <= new Date()) {
-            return res.status(400).json({ success: false, message: 'Deadline must be a future date' });
-        }
+        // Compute portal category from category field
+        const portalCategory = mapJobToPortalCategory({ category: category || '' });
         
         const job = await Job.create({
             employerId: req.user.id,
@@ -41,8 +53,24 @@ router.post('/', async (req, res) => {
             title,
             description,
             venue,
-            applyLink,
-            deadline: deadlineDate
+            applyLink: applyLink || '',
+            deadline: deadline ? new Date(deadline) : undefined,
+            location: location || '',
+            type: type || '',
+            salary: salary || '',
+            category: category || '',
+            portalCategory,
+            workMode: workMode || '',
+            experience: experience || '',
+            qualification: qualification || '',
+            sideSummary: sideSummary || '',
+            overview: overview || description,
+            postedDate: postedDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            responsibilities: responsibilities || [],
+            requirements: requirements || [],
+            skills: skills || [],
+            screeningQuestions: screeningQuestions || [],
+            logo: logo || '',
         });
         
         res.status(201).json({ success: true, data: job });
