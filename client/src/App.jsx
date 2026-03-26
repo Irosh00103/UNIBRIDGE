@@ -34,6 +34,7 @@ import JobPortalCategory from './pages/student/JobPortalCategory';
 import JobPortalDetail from './pages/student/JobPortalDetail';
 import JobPortalSaved from './pages/student/JobPortalSaved';
 import JobPortalApplications from './pages/student/JobPortalApplications';
+import JobPortalAlerts from './pages/student/JobPortalAlerts';
 
 function App() {
   return (
@@ -70,6 +71,8 @@ function App() {
                 <Route path="job-portal/jobs/:id" element={<JobPortalDetail />} />
                 <Route path="job-portal/saved" element={<JobPortalSaved />} />
                 <Route path="job-portal/applications" element={<JobPortalApplications />} />
+                <Route path="job-portal/alerts" element={<JobPortalAlerts />} />
+                <Route path="job-portal/my-space" element={<Navigate to="/profile" replace />} />
                 
                 {/* Fallback for student sub-routes */}
                 <Route path="*" element={<Navigate to="/student/home" replace />} />

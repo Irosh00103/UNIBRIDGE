@@ -25,3 +25,15 @@ export const deletePortalApplication = (id) => API.delete(`/applications/portal/
 export const getSavedJobs = () => API.get('/saved-jobs');
 export const saveJob = (data) => API.post('/saved-jobs', data);
 export const deleteSavedJob = (id) => API.delete(`/saved-jobs/${id}`);
+
+// ── Profile (Job Portal style) ──
+export const getPortalProfile = () => API.get('/profile/me');
+export const savePortalProfile = (data) => API.put('/profile/me', data);
+
+// ── Alerts ──
+export const getAlerts = () => API.get('/alerts');
+export const createAlert = (data) => API.post('/alerts', data);
+export const markAlertAsRead = (id) => API.patch(`/alerts/${id}/read`);
+export const markAllAlertsAsRead = () => API.patch('/alerts/read-all');
+export const deleteAlertApi = (id) => API.delete(`/alerts/${id}`);
+export const deleteSelectedAlertsApi = (ids) => API.delete('/alerts', { data: { ids } });
