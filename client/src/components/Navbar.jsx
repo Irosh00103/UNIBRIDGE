@@ -114,8 +114,8 @@ const Navbar = () => {
                                     <Link to="/student/job-portal" className="navbar-link">Job Portal</Link>
                                     <Link to="/student/job-portal/saved" className="navbar-link">Saved Jobs</Link>
                                     <Link to="/student/job-portal/applications" className="navbar-link">Applications</Link>
-                                    <Link to="/student/job-portal/alerts" className="navbar-link">Alerts</Link>
-                                    <Link to="/student/job-portal/my-space" className="navbar-link">My Space</Link>
+
+
                                     <Link to="/student/kuppi" className="navbar-link">Kuppi</Link>
                                     <div className="navbar-notification" onClick={openNotifications} role="button" tabIndex={0}>
                                         🔔

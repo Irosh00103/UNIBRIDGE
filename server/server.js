@@ -20,9 +20,9 @@ const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
 const kuppiRoutes = require('./routes/kuppi');
 const notificationRoutes = require('./routes/notifications');
-const alertsRoutes = require('./routes/alerts');
+
 const userRoutes = require('./routes/users');
-const profileRoutes = require('./routes/profile');
+
 const adminRoutes = require('./routes/admin');
 const savedJobRoutes = require('./routes/savedJobs');
 const uniAuthRoutes = require('./routes/uniAuth');
@@ -38,9 +38,9 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/kuppi', kuppiRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/alerts', alertsRoutes);
+
 app.use('/api/users', userRoutes);
-app.use('/api/profile', profileRoutes);
+
 app.use('/api/admin', adminRoutes);
 app.use('/api/saved-jobs', savedJobRoutes);
 app.use('/api/uni/auth', uniAuthRoutes);
