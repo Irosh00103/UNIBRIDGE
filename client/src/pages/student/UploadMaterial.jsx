@@ -10,16 +10,27 @@ const UploadMaterial = () => {
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const isValidHttpUrl = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return false;
+        try {
+            const parsed = new URL(trimmed);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch {
+            return false;
+        }
+    };
     
     const validate = () => {
         let tempErrors = {};
         if (!formData.title) tempErrors.title = 'Title is required';
         if (!formData.module) tempErrors.module = 'Module is required';
         if (!formData.type) tempErrors.type = 'Type is required';
-        if (!formData.link) {
-            tempErrors.link = 'Link is required';
-        } else if (!formData.link.startsWith('http')) {
-            tempErrors.link = 'Please enter a valid URL (starting with http:// or https://)';
+        if (!formData.link.trim()) {
+            tempErrors.link = 'Material link is required';
+        } else if (!isValidHttpUrl(formData.link)) {
+            tempErrors.link = 'Please enter a valid http/https URL. Plain text is not allowed.';
         }
         setErrors(tempErrors);
         return Object.keys(tempErrors).length === 0;
@@ -34,7 +45,8 @@ const UploadMaterial = () => {
         
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/materials', formData);
+            const payload = { ...formData, link: formData.link.trim() };
+            const res = await axios.post('http://localhost:5000/api/materials', payload);
             if (res.data.success) {
                 setSuccessMsg('Material uploaded successfully!');
                 setFormData({ title: '', module: '', description: '', type: 'PDF', link: '' });
