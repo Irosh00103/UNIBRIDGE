@@ -1,78 +1,216 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useJobs } from '../../context/JobsContext';
-import { FaTrash, FaExternalLinkAlt, FaArrowLeft } from 'react-icons/fa';
-import '../../styles/jobPortalPages.css';
+import "./ApplicationsPage.css";
+import { useMemo, useState } from "react";
+import {
+  FaArrowLeft,
+  FaSearch,
+  FaFileAlt,
+  FaTrashAlt,
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useJobs } from "../../context/JobsContext";
 
-const JobPortalApplications = () => {
-  const { applications, applicationsLoading, removeApplication } = useJobs();
+function formatDate(value) {
+  const date = new Date(value);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
-  const getStatusColor = (status) => {
-    switch (status?.toUpperCase()) {
-      case 'SELECTED':
-      case 'ACCEPTED': return 'var(--success)';
-      case 'REJECTED': return 'var(--danger)';
-      default: return 'var(--warning)';
-    }
-  };
+function StatusBadge({ status }) {
+  const normalized = status.toLowerCase();
 
   return (
-    <div className="jp-apps fade-in-up">
-      <Link to="/student/job-portal" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 14, fontWeight: 500, textDecoration: 'none', marginBottom: 24 }}>
-        <FaArrowLeft /> Back to Job Portal
-      </Link>
+    <span className={`applications-status-badge ${normalized}`}>
+      {status}
+    </span>
+  );
+}
 
-      <div className="jp-apps-header">
-        <h1>My <span>Applications</span></h1>
-      </div>
+export default function JobPortalApplications() {
+  const navigate = useNavigate();
+  const { applications, applicationsLoading, removeApplication } = useJobs();
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
-      {applicationsLoading ? (
-        <div className="loading">Loading applications…</div>
-      ) : applications.length === 0 ? (
-        <div className="empty-state">
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📝</div>
-          <h3>No applications yet</h3>
-          <p>Jobs you apply to will appear here.</p>
-          <Link to="/student/job-portal/all" className="btn btn-primary" style={{ marginTop: 16 }}>Find Jobs</Link>
-        </div>
-      ) : (
-        <div className="jp-apps-list">
-          {applications.map(app => (
-            <div key={app.id} className="jp-app-card">
-              <div className="jp-app-info">
-                <h3>{app.appliedJob}</h3>
-                <p>🏢 {app.company}</p>
-                <div style={{ display: 'flex', gap: 16, marginTop: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span className="jp-ref">Ref: {app.refNo}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Applied: {new Date(app.dateOfApply).toLocaleDateString()}</span>
-                  <span style={{ 
-                    fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 20,
-                    background: `${getStatusColor(app.status)}15`, color: getStatusColor(app.status)
-                  }}>
-                    {app.status?.toUpperCase() || 'PENDING'}
-                  </span>
+  const handleDeleteApplication = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this application from your tracking list?"
+    );
+
+    if (!confirmed) return;
+
+    await removeApplication(id);
+  };
+
+  const filteredApplications = useMemo(() => {
+    return applications.filter((item) => {
+      const matchesStatus =
+        statusFilter === "All" ? true : item.status === statusFilter;
+
+      const query = searchValue.trim().toLowerCase();
+      const matchesSearch =
+        query === ""
+          ? true
+          : item.refNo.toLowerCase().includes(query) ||
+            item.appliedJob.toLowerCase().includes(query) ||
+            item.company.toLowerCase().includes(query);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [applications, searchValue, statusFilter]);
+
+  if (applicationsLoading) {
+    return (
+      <div className="applications-page">
+        <div className="applications-container">
+          <section className="applications-hero">
+            <div className="applications-header">
+              <div className="applications-header-icon-wrap">
+                <div className="applications-header-icon-glow"></div>
+                <div className="applications-header-icon">
+                  <FaFileAlt />
                 </div>
               </div>
-              <div className="jp-safe-actions" style={{ display: 'flex', gap: 10 }}>
-                {app.jobId && (
-                  <Link to={`/student/job-portal/jobs/${app.jobId}`} className="btn btn-outline btn-sm" title="View Job">
-                    <FaExternalLinkAlt />
-                  </Link>
-                )}
-                <button className="btn btn-outline btn-sm" onClick={() => {
-                  if (window.confirm('Are you sure you want to withdraw this application?')) {
-                    removeApplication(app.id);
-                  }
-                }} style={{ color: 'var(--danger)', borderColor: 'var(--danger-light)' }} title="Withdraw">
-                  <FaTrash />
-                </button>
+
+              <div className="applications-header-text">
+                <h1>Welcome to your application tracking!</h1>
+                <p>Loading your applications...</p>
               </div>
             </div>
-          ))}
+          </section>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="applications-page">
+      <div className="applications-container">
+        <section className="applications-hero">
+          <div className="applications-header">
+            <div className="applications-header-icon-wrap">
+              <div className="applications-header-icon-glow"></div>
+              <div className="applications-header-icon">
+                <FaFileAlt />
+              </div>
+            </div>
+
+            <div className="applications-header-text">
+              <h1>Welcome to your application tracking!</h1>
+              <p>
+                Stay organized and keep track of every role you've applied for in
+                one place.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="applications-table-card">
+          <div className="applications-toolbar">
+            <div className="applications-search-wrap">
+              <FaSearch className="applications-search-icon" />
+              <input
+                type="text"
+                placeholder="Search by reference number, job title, or company"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="applications-search-input"
+              />
+            </div>
+
+            <div className="applications-filter-wrap">
+              <label htmlFor="statusFilter" className="applications-filter-label">
+                Filter by status
+              </label>
+              <select
+                id="statusFilter"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="applications-filter-select"
+              >
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Selected">Selected</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="applications-table-wrap">
+            <table className="applications-table">
+              <thead>
+                <tr>
+                  <th>App. Ref. No</th>
+                  <th>Applied Job</th>
+                  <th>Company</th>
+                  <th>Date of Apply</th>
+                  <th>Status</th>
+                  <th className="applications-actions-heading">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredApplications.length > 0 ? (
+                  filteredApplications.map((item) => (
+                    <tr key={item.id}>
+                      <td className="applications-ref">{item.refNo}</td>
+                      <td>{item.appliedJob}</td>
+                      <td>{item.company}</td>
+                      <td>{formatDate(item.dateOfApply)}</td>
+                      <td>
+                        <StatusBadge status={item.status} />
+                      </td>
+                      <td className="applications-actions-cell">
+                        <button
+                          type="button"
+                          className="applications-delete-btn"
+                          onClick={() => handleDeleteApplication(item.id)}
+                          aria-label={`Delete application ${item.refNo}`}
+                          title="Delete application"
+                        >
+                          <FaTrashAlt />
+                          <span>Delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6">
+                      <div className="applications-empty-state">
+                        <div className="applications-empty-illustration">
+                          <div className="applications-empty-illustration-circle">
+                            <FaFileAlt />
+                          </div>
+                        </div>
+
+                        <h3>No applications yet</h3>
+                        <p>
+                          Once you start applying for jobs, your application
+                          details will appear here automatically.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div className="applications-bottom-actions">
+          <button
+            type="button"
+            className="applications-return-home-btn"
+            onClick={() => navigate("/")}
+          >
+            <FaArrowLeft />
+            <span>Return to home</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default JobPortalApplications;
+}

@@ -114,6 +114,11 @@ const Navbar = () => {
         setShowNotifications(!showNotifications);
     };
 
+    const handleViewAllNotifications = () => {
+        setShowNotifications(false);
+        navigate('/student/notifications');
+    };
+
     return (
         <nav className={`navbar-marvel ${scrolled ? 'navbar-scrolled' : ''}`}>
             <div className="navbar-container">
@@ -183,6 +188,11 @@ const Navbar = () => {
                                                             </div>
                                                         ))
                                                     )}
+                                                </div>
+                                                <div className="notification-footer">
+                                                    <button className="notification-view-btn" onClick={handleViewAllNotifications}>
+                                                        View
+                                                    </button>
                                                 </div>
                                             </div>
                                         )}

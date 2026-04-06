@@ -27,6 +27,7 @@ import EmployerDashboard from './pages/employer/EmployerDashboard';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProfessionalProfile from './pages/student/ProfessionalProfile';
+import AlertsPage from './pages/AlertsPage';
 
 // Job Portal Pages
 import JobPortal from './pages/student/JobPortal';
@@ -74,6 +75,7 @@ function App() {
                 <Route path="job-portal/saved" element={<JobPortalSaved />} />
                 <Route path="job-portal/applications" element={<JobPortalApplications />} />
                 <Route path="profile/professional" element={<ProfessionalProfile />} />
+                <Route path="notifications" element={<AlertsPage />} />
 
 
                 
