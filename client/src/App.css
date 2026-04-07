@@ -6,45 +6,45 @@
   --primary-hover: #4338ca;
   --primary-light: #e0e7ff;
   --primary-glow: rgba(79, 70, 229, 0.4);
-  
+
   --secondary: #ec4899;
   --secondary-hover: #db2777;
   --secondary-light: #fce7f3;
-  
+
   --success: #10b981;
   --success-light: #d1fae5;
   --danger: #ef4444;
   --danger-light: #fee2e2;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
-  
+
   /* Dark / Light Mode Neutral Colors */
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
   --bg-input: #f1f5f9;
-  
+
   --text-main: #0f172a;
   --text-muted: #64748b;
-  
+
   --border-light: #e2e8f0;
   --border-focus: #cbd5e1;
-  
+
   /* Shadows & Effects */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-glow: 0 0 20px var(--primary-glow);
-  
+
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
-  
+
   /* Radii */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-full: 9999px;
-  
+
   /* Transitions */
   --transition-fast: 0.15s ease-in-out;
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -79,7 +79,12 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Outfit', sans-serif;
   color: var(--text-main);
   font-weight: 700;
@@ -110,8 +115,15 @@ a:hover {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Cards & Containers */
@@ -168,11 +180,23 @@ a:hover {
   box-shadow: var(--shadow-glow);
 }
 
-.btn-success { background: var(--success); color: white; }
-.btn-success:hover { background: #059669; }
+.btn-success {
+  background: var(--success);
+  color: white;
+}
 
-.btn-danger { background: var(--danger); color: white; }
-.btn-danger:hover { background: #dc2626; }
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
 
 .btn-outline {
   background: transparent;
@@ -200,6 +224,7 @@ a:hover {
   background: transparent;
   color: var(--text-muted);
 }
+
 .btn-ghost:hover {
   background: var(--bg-input);
   color: var(--text-main);
@@ -219,8 +244,8 @@ a:hover {
   color: var(--text-main);
 }
 
-.form-group input, 
-.form-group select, 
+.form-group input,
+.form-group select,
 .form-group textarea {
   width: 100%;
   padding: 14px 16px;
@@ -234,8 +259,8 @@ a:hover {
   transition: all var(--transition-fast);
 }
 
-.form-group input:focus, 
-.form-group select:focus, 
+.form-group input:focus,
+.form-group select:focus,
 .form-group textarea:focus {
   background: var(--bg-card);
   border-color: var(--primary);
@@ -256,8 +281,15 @@ a:hover {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Badges */
@@ -272,11 +304,33 @@ a:hover {
   letter-spacing: 0.05em;
 }
 
-.badge-open { background: var(--primary-light); color: var(--primary); }
-.badge-pending { background: var(--warning-light); color: var(--warning); }
-.badge-success, .badge-selected { background: var(--success-light); color: var(--success); }
-.badge-danger, .badge-rejected { background: var(--danger-light); color: var(--danger); }
-.badge-type { background: var(--bg-main); color: var(--text-muted); border: 1px solid var(--border-light); }
+.badge-open {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.badge-pending {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.badge-success,
+.badge-selected {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.badge-danger,
+.badge-rejected {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.badge-type {
+  background: var(--bg-main);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
 
 /* Alerts */
 .alert {
@@ -290,8 +344,17 @@ a:hover {
   font-weight: 500;
 }
 
-.alert-success { background: var(--success-light); color: #065f46; border: 1px solid #a7f3d0; }
-.alert-error { background: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
+.alert-success {
+  background: var(--success-light);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+  background: var(--danger-light);
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
 
 /* Tables */
 .table-container {
@@ -358,7 +421,9 @@ table tr:hover td {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state {

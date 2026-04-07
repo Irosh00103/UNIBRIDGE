@@ -198,8 +198,8 @@ const StudentHome = () => {
   const navigate = useNavigate();
   const stats = [
     { icon: '📚', value: 12, label: 'Materials Saved' },
-    { icon: '🎓', value: 3,  label: 'Kuppis Joined' },
-    { icon: '🔖', value: 2,  label: 'Saved Jobs' },
+    { icon: '🎓', value: 3, label: 'Kuppis Joined' },
+    { icon: '🔖', value: 2, label: 'Saved Jobs' },
   ];
 
   const features = [
@@ -226,8 +226,8 @@ const StudentHome = () => {
   ];
 
   const recentActivity = [
-    { icon: '📚', title: 'New material uploaded: CS3042 Lecture 7',  meta: 'Yesterday · Lecture Materials',    path: '/student/materials'    },
-    { icon: '🎓', title: 'Kuppi: Database Systems – Friday 6 PM',    meta: '2 days ago · Kuppi Hub',           path: '/student/kuppi'        },
+    { icon: '📚', title: 'New material uploaded: CS3042 Lecture 7', meta: 'Yesterday · Lecture Materials', path: '/student/materials' },
+    { icon: '🎓', title: 'Kuppi: Database Systems – Friday 6 PM', meta: '2 days ago · Kuppi Hub', path: '/student/kuppi' },
   ];
 
   return (

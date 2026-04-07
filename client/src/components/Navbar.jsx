@@ -201,6 +201,7 @@ const Navbar = () => {
                             ) : (
                                 <>
                                     <Link to="/" className="navbar-link">Home</Link>
+                                    <Link to="/employer/dashboard" className="navbar-link">Dashboard</Link>
                                     <Link to="/employer/jobs/create" className="navbar-link">Post Job</Link>
                                 </>
                             )}

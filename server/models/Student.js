@@ -10,6 +10,12 @@ const studentSchema = new mongoose.Schema({
   isAvailable: { type: Boolean, default: false },
   profileHeadline: { type: String, default: '' },
   
+  // Academic Profile
+  university: { type: String, default: '' },
+  degree: { type: String, default: '' },
+  year: { type: String, default: '' },
+  department: { type: String, default: '' },
+  
   education: [{
     institution: String,
     degree: String,
@@ -53,6 +59,18 @@ const studentSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   linkedin: { type: String, default: '' },
   portfolio: { type: String, default: '' },
+  
+  projects: [{
+    title: String,
+    description: String,
+    link: String
+  }],
+  
+  certifications: [{
+    name: String,
+    issuer: String,
+    date: Date
+  }],
   
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

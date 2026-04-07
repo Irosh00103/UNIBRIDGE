@@ -215,8 +215,17 @@
   background: var(--bg-input);
 }
 
-.react-btn.liked { color: var(--success); border-color: var(--success-light); background: #f0fdf4; }
-.react-btn.disliked { color: var(--danger); border-color: var(--danger-light); background: #fef2f2; }
+.react-btn.liked {
+  color: var(--success);
+  border-color: var(--success-light);
+  background: #f0fdf4;
+}
+
+.react-btn.disliked {
+  color: var(--danger);
+  border-color: var(--danger-light);
+  background: #fef2f2;
+}
 
 /* Upload Form Card */
 .upload-card {

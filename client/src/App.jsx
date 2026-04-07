@@ -53,6 +53,22 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         
+        {/* Job Portal Routes Additive Layer - Restricted to Students Only as requested */}
+        <Route path="/job-portal/*" element={
+          <ProtectedRoute role="student">
+            <JobsProvider>
+              <Routes>
+                <Route path="/" element={<JobPortal />} />
+                <Route path="all" element={<JobPortalAll />} />
+                <Route path="categories/:slug" element={<JobPortalCategory />} />
+                <Route path="jobs/:id" element={<JobPortalDetail />} />
+                <Route path="saved" element={<JobPortalSaved />} />
+                <Route path="applications" element={<JobPortalApplications />} />
+              </Routes>
+            </JobsProvider>
+          </ProtectedRoute>
+        } />
+        
         {/* Student Routes */}
         <Route path="/student/*" element={
           <ProtectedRoute role="student">
