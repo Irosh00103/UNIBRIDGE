@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaEdit, FaPlus, FaTrash, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import '../../styles/professionalProfile.css';
 
 const ProfessionalProfile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);

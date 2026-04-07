@@ -5,7 +5,7 @@
 .saved-jobs-page {
   min-height: 100vh;
   background: #f3f1ed;
-  padding: 36px 0 46px;
+  padding: calc(70px + 24px) 0 46px;
 }
 
 .saved-jobs-container {
