@@ -172,7 +172,9 @@ export function JobsProvider({ children }) {
   /* ── SAVED JOBS ── */
   const saveJobAction = async (job) => {
     const jobId = job._id || job.id;
-    if (savedJobs.some((s) => s.id === jobId)) return;
+    if (savedJobs.some((s) => s.id === jobId)) {
+      return { success: true, message: 'Already saved' };
+    }
 
     try {
       const res = await saveJobApi({ jobId });
@@ -186,8 +188,13 @@ export function JobsProvider({ children }) {
         description: job.sideSummary || job.overview,
       };
       setSavedJobs((prev) => [savedItem, ...prev]);
+      return { success: true };
     } catch (err) {
       console.error(err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Failed to save job.',
+      };
     }
   };
 
@@ -195,13 +202,18 @@ export function JobsProvider({ children }) {
     const saved = savedJobs.find((s) => s.id === jobId);
     if (!saved?.savedId) {
       setSavedJobs((prev) => prev.filter((s) => s.id !== jobId));
-      return;
+      return { success: true };
     }
     try {
       await deleteSavedJob(saved.savedId);
       setSavedJobs((prev) => prev.filter((s) => s.id !== jobId));
+      return { success: true };
     } catch (err) {
       console.error(err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Failed to remove saved job.',
+      };
     }
   };
 

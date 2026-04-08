@@ -310,9 +310,12 @@
 .prof-modal {
   background: white;
   width: 100%;
-  max-width: 650px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  min-height: 420px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   border-radius: 24px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
   animation: modalIn 0.3s ease-out;
@@ -364,6 +367,8 @@
 
 .modal-body {
   padding: 30px;
+  overflow-y: auto;
+  max-height: calc(100vh - 260px);
 }
 
 .modal-footer {
@@ -382,6 +387,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  align-items: start;
 }
 
 .form-group {
@@ -404,11 +410,18 @@
 .form-group select, 
 .form-group textarea {
   width: 100%;
+  min-height: 46px;
   padding: 12px 14px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   font-size: 14px;
+  line-height: 1.4;
   transition: all 0.2s;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .form-group input:focus, 
@@ -819,4 +832,72 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+@media (max-width: 992px) {
+  .prof-modal {
+    max-width: min(700px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+  }
+
+  .modal-body {
+    padding: 24px;
+    max-height: calc(100vh - 240px);
+  }
+}
+
+@media (max-width: 768px) {
+  .prof-modal {
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    min-height: 0;
+    border-radius: 16px;
+  }
+
+  .modal-header,
+  .modal-footer,
+  .modal-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .modal-header {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .modal-body {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    max-height: calc(100vh - 210px);
+  }
+
+  .modal-footer {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .form-group.full-width {
+    grid-column: auto;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .form-group textarea {
+    min-height: 108px;
+  }
 }

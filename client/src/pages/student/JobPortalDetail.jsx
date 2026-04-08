@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   FaMapMarkerAlt,
@@ -11,6 +11,27 @@ import {
 } from "react-icons/fa";
 import { useJobs } from "../../context/JobsContext";
 import "../../styles/jobPortalDetail.css";
+
+const DEFAULT_SCREENING_QUESTIONS = [
+  {
+    id: "readiness-summary",
+    type: "textarea",
+    question:
+      "Why are you interested in this role, and how does it align with your current learning or career goals?",
+  },
+  {
+    id: "applied-knowledge",
+    type: "textarea",
+    question:
+      "Describe one project, coursework, or experience where you applied relevant skills for this position.",
+  },
+  {
+    id: "problem-solving",
+    type: "textarea",
+    question:
+      "Share a challenging problem you solved recently and explain how you approached it.",
+  },
+];
 
 function JobPortalDetail() {
   const { id } = useParams();
@@ -33,8 +54,39 @@ function JobPortalDetail() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [answers, setAnswers] = useState({});
+  const [toast, setToast] = useState({ visible: false, type: "success", text: "" });
 
   const today = new Date().toISOString().split("T")[0];
+
+  const screeningQuestions = useMemo(() => {
+    if (Array.isArray(job?.screeningQuestions) && job.screeningQuestions.length > 0) {
+      return job.screeningQuestions;
+    }
+
+    if (Array.isArray(job?.questions) && job.questions.length > 0) {
+      return job.questions.map((q, index) => ({
+        id: `legacy-question-${index + 1}`,
+        type: "textarea",
+        question: q.questionText,
+        options: [],
+      }));
+    }
+
+    return DEFAULT_SCREENING_QUESTIONS;
+  }, [job]);
+
+  useEffect(() => {
+    if (!toast.visible) return undefined;
+    const timer = setTimeout(() => {
+      setToast((prev) => ({ ...prev, visible: false }));
+    }, 2800);
+
+    return () => clearTimeout(timer);
+  }, [toast.visible]);
+
+  const showToast = (type, text) => {
+    setToast({ visible: true, type, text });
+  };
 
   if (jobsLoading) {
     return <div>Loading job details...</div>;
@@ -85,20 +137,31 @@ function JobPortalDetail() {
     const result = await addApplication(job, answers);
 
     if (!result.success) {
-      alert(result.message);
+      showToast("error", result.message || "Could not submit your application.");
       return;
     }
 
-    alert("Application submitted successfully.");
+    showToast("success", "Application submitted successfully.");
     setIsModalOpen(false);
     setAnswers({});
   };
 
   const handleSaveToggle = async () => {
     if (isSaved) {
-      unsaveJob(jobId);
+      const result = await unsaveJob(jobId);
+      if (result?.success) {
+        showToast("success", "Job removed from saved jobs.");
+      } else {
+        showToast("error", result?.message || "Could not remove the saved job.");
+      }
+      return;
+    }
+
+    const result = await saveJob(job);
+    if (result?.success) {
+      showToast("success", "Job saved successfully.");
     } else {
-      await saveJob(job);
+      showToast("error", result?.message || "Could not save the job.");
     }
   };
 
@@ -132,7 +195,7 @@ function JobPortalDetail() {
             <section className="job-main-section">
               <h4>Key Responsibilities</h4>
               <ul className="job-detail-list blue-bullets">
-                {job.responsibilities.map((item, index) => (
+                {(job.responsibilities || []).map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
               </ul>
@@ -141,7 +204,7 @@ function JobPortalDetail() {
             <section className="job-main-section">
               <h4>Qualifications & Experience</h4>
               <ul className="job-detail-list blue-bullets">
-                {job.requirements.map((item, index) => (
+                {(job.requirements || []).map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
               </ul>
@@ -202,7 +265,7 @@ function JobPortalDetail() {
                   className="job-apply-btn"
                   onClick={() => {
                     if (alreadyApplied) {
-                      alert("You have already applied for this job.");
+                      showToast("info", "You have already applied for this job.");
                       return;
                     }
                     setIsModalOpen(true);
@@ -332,8 +395,8 @@ function JobPortalDetail() {
                 </p>
 
                 <div className="screening-questions-list">
-                  {job.screeningQuestions.map((item, index) => (
-                    <div className="question-card" key={item.id}>
+                  {screeningQuestions.map((item, index) => (
+                    <div className="question-card" key={item.id || `q-${index + 1}`}>
                       <label className="question-title">
                         {index + 1}. {item.question}
                       </label>
@@ -342,9 +405,9 @@ function JobPortalDetail() {
                         <textarea
                           rows="4"
                           placeholder="Write your answer here..."
-                          value={answers[item.id] || ""}
+                          value={answers[item.id || `q-${index + 1}`] || ""}
                           onChange={(e) =>
-                            handleChange(item.id, e.target.value)
+                            handleChange(item.id || `q-${index + 1}`, e.target.value)
                           }
                           required
                         />
@@ -352,14 +415,14 @@ function JobPortalDetail() {
 
                       {item.type === "select" && (
                         <select
-                          value={answers[item.id] || ""}
+                          value={answers[item.id || `q-${index + 1}`] || ""}
                           onChange={(e) =>
-                            handleChange(item.id, e.target.value)
+                            handleChange(item.id || `q-${index + 1}`, e.target.value)
                           }
                           required
                         >
                           <option value="">Select an answer</option>
-                          {item.options.map((option) => (
+                          {(item.options || []).map((option) => (
                             <option value={option} key={option}>
                               {option}
                             </option>
@@ -418,6 +481,12 @@ function JobPortalDetail() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {toast.visible && (
+        <div className={`job-detail-toast ${toast.type}`} role="status" aria-live="polite">
+          {toast.text}
         </div>
       )}
     </div>
