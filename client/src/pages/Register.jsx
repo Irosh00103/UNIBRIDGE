@@ -72,65 +72,86 @@ const Register = () => {
 
     return (
         <div className="auth-bg">
-            <div className="auth-card">
-                <div className="auth-header">
-                    <div className="auth-logo">🚀</div>
-                    <h1 className="auth-title">Create Account</h1>
-                    <div className="auth-badge">Join UniBridge</div>
-                </div>
-                {error && <div className="alert alert-error">{error}</div>}
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Full Name</label>
-                        <input 
-                            type="text" 
-                            value={formData.name} 
-                            onChange={e => setFormData({...formData, name: e.target.value})} 
-                            placeholder="John Doe"
-                            className={errors.name ? 'error' : ''}
-                        />
-                        {errors.name && <span className="error-text">{errors.name}</span>}
+            <div className="auth-shell">
+                <aside className="auth-side-panel">
+                    <div className="auth-side-badge">Build Your Future</div>
+                    <h2>Create your UniBridge account in under a minute.</h2>
+                    <p>Join students and employers in one connected ecosystem for academic collaboration and career opportunities.</p>
+                    <div className="auth-illustration-wrap">
+                        <img src="/auth-illustration.svg" alt="UniBridge registration illustration" className="auth-illustration" />
                     </div>
-                    <div className="form-group">
-                        <label>Email Address</label>
-                        <input 
-                            type="email" 
-                            value={formData.email} 
-                            onChange={e => setFormData({...formData, email: e.target.value})} 
-                            placeholder="john@example.com"
-                            className={errors.email ? 'error' : ''}
-                        />
-                        {errors.email && <span className="error-text">{errors.email}</span>}
+                    <div className="auth-side-metrics">
+                        <div>
+                            <strong>800+</strong>
+                            <span>Study resources</span>
+                        </div>
+                        <div>
+                            <strong>98%</strong>
+                            <span>Platform satisfaction</span>
+                        </div>
                     </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input 
-                            type="password" 
-                            value={formData.password} 
-                            onChange={e => setFormData({...formData, password: e.target.value})} 
-                            placeholder="Minimum 6 characters"
-                            className={errors.password ? 'error' : ''}
-                        />
-                        {errors.password && <span className="error-text">{errors.password}</span>}
+                </aside>
+
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <div className="auth-logo">🚀</div>
+                        <h1 className="auth-title">Create Account</h1>
+                        <div className="auth-badge">Join UniBridge</div>
                     </div>
-                    <div className="form-group">
-                        <label>Account Type</label>
-                        <select
-                            value={formData.role}
-                            onChange={e => setFormData({ ...formData, role: e.target.value })}
-                            className={errors.role ? 'error' : ''}
-                        >
-                            <option value="student">Student</option>
-                            <option value="employer">Employer</option>
-                        </select>
-                        {errors.role && <span className="error-text">{errors.role}</span>}
+                    {error && <div className="alert alert-error">{error}</div>}
+                    <form onSubmit={handleSubmit} className="auth-form-grid">
+                        <div className="form-group">
+                            <label>Full Name</label>
+                            <input 
+                                type="text" 
+                                value={formData.name} 
+                                onChange={e => setFormData({...formData, name: e.target.value})} 
+                                placeholder="John Doe"
+                                className={errors.name ? 'error' : ''}
+                            />
+                            {errors.name && <span className="error-text">{errors.name}</span>}
+                        </div>
+                        <div className="form-group">
+                            <label>Email Address</label>
+                            <input 
+                                type="email" 
+                                value={formData.email} 
+                                onChange={e => setFormData({...formData, email: e.target.value})} 
+                                placeholder="john@example.com"
+                                className={errors.email ? 'error' : ''}
+                            />
+                            {errors.email && <span className="error-text">{errors.email}</span>}
+                        </div>
+                        <div className="form-group">
+                            <label>Password</label>
+                            <input 
+                                type="password" 
+                                value={formData.password} 
+                                onChange={e => setFormData({...formData, password: e.target.value})} 
+                                placeholder="Minimum 6 characters"
+                                className={errors.password ? 'error' : ''}
+                            />
+                            {errors.password && <span className="error-text">{errors.password}</span>}
+                        </div>
+                        <div className="form-group">
+                            <label>Account Type</label>
+                            <select
+                                value={formData.role}
+                                onChange={e => setFormData({ ...formData, role: e.target.value })}
+                                className={errors.role ? 'error' : ''}
+                            >
+                                <option value="student">Student</option>
+                                <option value="employer">Employer</option>
+                            </select>
+                            {errors.role && <span className="error-text">{errors.role}</span>}
+                        </div>
+                        <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
+                            {loading ? 'Creating Account...' : 'Sign Up'}
+                        </button>
+                    </form>
+                    <div className="auth-footer">
+                        Already have an account? <Link to="/login">Log in</Link>
                     </div>
-                    <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
-                        {loading ? 'Creating Account...' : 'Sign Up'}
-                    </button>
-                </form>
-                <div className="auth-footer">
-                    Already have an account? <Link to="/login">Log in</Link>
                 </div>
             </div>
         </div>

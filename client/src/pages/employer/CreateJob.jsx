@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const CreateJob = () => {
     const [formData, setFormData] = useState({ title: '', company: '', venue: '', applyLink: '', description: '', deadline: '' });
@@ -10,6 +11,7 @@ const CreateJob = () => {
     const [loading, setLoading] = useState(false);
     
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const validate = () => {
         let tempErrors = {};
@@ -46,7 +48,7 @@ const CreateJob = () => {
                 setFormData({ title: '', company: '', venue: '', applyLink: '', description: '', deadline: '' });
                 setErrors({});
                 setTimeout(() => {
-                    navigate('/admin/dashboard');
+                    navigate(user?.role === 'admin' ? '/admin/dashboard' : '/employer/dashboard');
                 }, 2000);
             }
         } catch (err) {
@@ -82,6 +84,7 @@ const CreateJob = () => {
                 <div style={{ textAlign: 'center' }}>
                     <h1 style={{ fontSize: '40px', fontWeight: 800, fontFamily: "'Outfit', sans-serif", color: 'var(--text-main)' }}>Publish Job Opportunity</h1>
                     <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Post internships and full-time roles directly to the student portal.</p>
+                        <div className="auth-badge" style={{ marginTop: '14px' }}>Employers & Admins</div>
                 </div>
             </div>
 

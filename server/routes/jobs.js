@@ -28,8 +28,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: 'Admins only' });
+        if (!['admin', 'employer'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Employers and admins only' });
         }
         
         const {
