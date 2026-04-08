@@ -24,6 +24,7 @@ import Kuppi from './pages/student/Kuppi';
 import CreateJob from './pages/employer/CreateJob';
 import ViewApplicants from './pages/employer/ViewApplicants';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
+import ViewStudentProfile from './pages/employer/ViewStudentProfile';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProfessionalProfile from './pages/student/ProfessionalProfile';
@@ -106,6 +107,7 @@ function App() {
         <Route path="/employer/dashboard" element={<ProtectedRoute role={['admin', 'employer']}><EmployerDashboard /></ProtectedRoute>} />
         <Route path="/employer/jobs/create" element={<ProtectedRoute role={['admin', 'employer']}><CreateJob /></ProtectedRoute>} />
         <Route path="/employer/jobs/:id/applicants" element={<ProtectedRoute role={['admin', 'employer']}><ViewApplicants /></ProtectedRoute>} />
+        <Route path="/employer/students/profile" element={<ProtectedRoute role={['admin', 'employer']}><ViewStudentProfile /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         
         {/* Fallback */}

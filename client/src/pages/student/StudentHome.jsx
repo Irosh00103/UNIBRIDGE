@@ -1,9 +1,60 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../components/Footer';
 import '../../styles/studentHome.css';
+
+const API_BASE = 'http://localhost:5000/api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('ub_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+function calculateProfileCompletion(profile) {
+  if (!profile) return 0;
+
+  const checks = [
+    Boolean(profile.firstName),
+    Boolean(profile.lastName),
+    Boolean(profile.phone),
+    Boolean(profile.birthDate),
+    Boolean(profile.currentPosition),
+    Boolean(profile.gender),
+    Boolean(profile.profilePicture),
+    (profile.workExperiences || []).length > 0,
+    (profile.educationItems || []).length > 0,
+    (profile.skills || []).length > 0,
+    (profile.languages || []).length > 0,
+    Object.values(profile.targetJob || {}).some(Boolean),
+    Object.values(profile.otherAssets || {}).some(Boolean),
+  ];
+
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+function formatRelativeTime(value) {
+  if (!value) return 'Just now';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Just now';
+
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return 'Just now';
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  return date.toLocaleDateString();
+}
 
 // ========== Helper: useCounter (with cleanup) ==========
 function useCounter(target, duration = 1200) {
@@ -104,7 +155,7 @@ function Hero({ user, navigate }) {
   );
 }
 
-function ProfileSnapshot({ user, navigate }) {
+function ProfileSnapshot({ user, navigate, profileCompletion }) {
   const fullName = user?.name || 'Student User';
   const firstLetter = fullName.charAt(0).toUpperCase();
 
@@ -117,10 +168,10 @@ function ProfileSnapshot({ user, navigate }) {
       <div className="snapshot-progress-block">
         <div className="snapshot-progress-head">
           <span>Profile completion</span>
-          <strong>72%</strong>
+          <strong>{profileCompletion}%</strong>
         </div>
         <div className="snapshot-progress-track">
-          <div className="snapshot-progress-fill" style={{ width: '72%' }}></div>
+          <div className="snapshot-progress-fill" style={{ width: `${profileCompletion}%` }}></div>
         </div>
       </div>
 
@@ -219,9 +270,19 @@ function RecentActivity({ activities, navigate }) {
         <span className="recent-badge">Live Feed</span>
       </div>
       <div className="recent-grid">
-        {activities.map((item) => (
-          <RecentItem key={item.title} {...item} navigate={navigate} />
-        ))}
+        {activities.length > 0 ? (
+          activities.map((item) => (
+            <RecentItem key={`${item.title}-${item.meta}`} {...item} navigate={navigate} />
+          ))
+        ) : (
+          <div className="recent-item">
+            <div className="recent-icon">ℹ️</div>
+            <div className="recent-content">
+              <h4>No recent activity yet</h4>
+              <p>Start exploring materials, jobs, and kuppi sessions to see updates here.</p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -231,11 +292,111 @@ function RecentActivity({ activities, navigate }) {
 const StudentHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const stats = [
-    { icon: '📚', value: 12, label: 'Materials Saved' },
-    { icon: '🎓', value: 3, label: 'Kuppis Joined' },
-    { icon: '🔖', value: 2, label: 'Saved Jobs' },
-  ];
+  const [dashboardData, setDashboardData] = useState({
+    profileCompletion: 0,
+    materialsSaved: 0,
+    kuppisJoined: 0,
+    savedJobs: 0,
+    recentActivity: [],
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchDashboardData = async () => {
+      try {
+        const headers = getAuthHeaders();
+
+        const [studentProfileRes, materialsRes, kuppiPostsRes, savedJobsRes, applicationsRes] = await Promise.all([
+          axios.get(`${API_BASE}/uni/students/profile`, { headers }),
+          axios.get(`${API_BASE}/materials`, { headers }),
+          axios.get(`${API_BASE}/kuppi/posts`, { headers }),
+          axios.get(`${API_BASE}/saved-jobs`, { headers }),
+          axios.get(`${API_BASE}/applications/portal/mine`, { headers }),
+        ]);
+
+        const profile = studentProfileRes.data || {};
+        const profileCompletion = calculateProfileCompletion(profile);
+
+        const materials = materialsRes.data?.data || [];
+        const materialsSaved = materials.filter((material) => material.userLiked).length;
+
+        const kuppiPosts = kuppiPostsRes.data?.data || [];
+        const kuppisJoined = kuppiPosts.filter((post) => post.userJoined).length;
+
+        const savedJobsList = savedJobsRes.data?.data || [];
+        const savedJobs = savedJobsList.length;
+
+        const myApplications = applicationsRes.data?.data || [];
+        const userId = user?.id;
+
+        const activityItems = [
+          ...materials
+            .filter((material) => String(material.studentId) === String(userId))
+            .map((material) => ({
+              icon: '📚',
+              title: `You uploaded: ${material.title}`,
+              meta: `${formatRelativeTime(material.createdAt)} · Lecture Materials`,
+              path: '/student/materials',
+              timestamp: material.createdAt,
+            })),
+          ...kuppiPosts
+            .filter((post) => post.userJoined)
+            .map((post) => ({
+              icon: '🎓',
+              title: `You joined Kuppi: ${post.title}`,
+              meta: `${formatRelativeTime(post.createdAt || post.date)} · Kuppi Hub`,
+              path: '/student/kuppi',
+              timestamp: post.createdAt || post.date,
+            })),
+          ...savedJobsList.map((savedJob) => ({
+            icon: '🔖',
+            title: `Saved job: ${savedJob.jobId?.title || 'Job opportunity'}`,
+            meta: `${formatRelativeTime(savedJob.createdAt)} · Saved Jobs`,
+            path: '/student/job-portal/saved',
+            timestamp: savedJob.createdAt,
+          })),
+          ...myApplications.map((application) => ({
+            icon: '💼',
+            title: `Applied to: ${application.jobId?.title || 'Job opportunity'}`,
+            meta: `${formatRelativeTime(application.createdAt || application.appliedAt)} · Job Portal`,
+            path: '/student/job-portal/applications',
+            timestamp: application.createdAt || application.appliedAt,
+          })),
+        ]
+          .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))
+          .slice(0, 5)
+          .map(({ timestamp, ...rest }) => rest);
+
+        if (!isMounted) return;
+
+        setDashboardData({
+          profileCompletion,
+          materialsSaved,
+          kuppisJoined,
+          savedJobs,
+          recentActivity: activityItems,
+        });
+      } catch (error) {
+        if (!isMounted) return;
+        setDashboardData((prev) => ({ ...prev, recentActivity: [] }));
+      }
+    };
+
+    fetchDashboardData();
+    const intervalId = setInterval(fetchDashboardData, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [user?.id]);
+
+  const stats = useMemo(() => ([
+    { icon: '📚', value: dashboardData.materialsSaved, label: 'Materials Saved' },
+    { icon: '🎓', value: dashboardData.kuppisJoined, label: 'Kuppis Joined' },
+    { icon: '🔖', value: dashboardData.savedJobs, label: 'Saved Jobs' },
+  ]), [dashboardData.materialsSaved, dashboardData.kuppisJoined, dashboardData.savedJobs]);
 
   const features = [
     {
@@ -260,10 +421,7 @@ const StudentHome = () => {
     },
   ];
 
-  const recentActivity = [
-    { icon: '📚', title: 'New material uploaded: CS3042 Lecture 7', meta: 'Yesterday · Lecture Materials', path: '/student/materials' },
-    { icon: '🎓', title: 'Kuppi: Database Systems – Friday 6 PM', meta: '2 days ago · Kuppi Hub', path: '/student/kuppi' },
-  ];
+  const recentActivity = dashboardData.recentActivity;
 
   return (
     <>
@@ -272,7 +430,7 @@ const StudentHome = () => {
         <div className="container">
           <div className="dashboard-top-grid">
             <Hero user={user} navigate={navigate} />
-            <ProfileSnapshot user={user} navigate={navigate} />
+            <ProfileSnapshot user={user} navigate={navigate} profileCompletion={dashboardData.profileCompletion} />
           </div>
           <StatGrid stats={stats} />
           <FeatureGrid features={features} navigate={navigate} />

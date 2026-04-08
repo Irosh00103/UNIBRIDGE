@@ -99,7 +99,12 @@ const EmployerDashboard = () => {
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <button 
                                                 className="btn btn-outline btn-sm"
-                                                onClick={() => navigate(`/employer/jobs/${job._id}/applicants`, { state: job })}
+                                                onClick={() => navigate(`/employer/jobs/${job._id}/applicants`, {
+                                                    state: {
+                                                        ...job,
+                                                        _origin: 'employer-dashboard',
+                                                    },
+                                                })}
                                                 style={{ padding: '6px 12px', fontSize: '13px' }}
                                             >
                                                 View Applicants

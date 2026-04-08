@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getStudentProfileApi } from '../../services/api';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getStudentProfileByEmailForEmployer } from '../../services/api';
 import { FaCheckCircle, FaProjectDiagram, FaChartBar, FaMicrochip, FaBriefcase, FaHardHat, FaBullhorn, FaSearch, FaCogs, FaHeadset, FaCoins, FaGraduationCap, FaUsers } from 'react-icons/fa';
 import '../../styles/professionalProfile.css';
 
 const ViewStudentProfile = () => {
-    const { id } = useParams();
+    const { state } = useLocation();
+    const email = state?.email || '';
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (state?._origin !== 'employer-applicants') {
+            navigate('/employer/dashboard', { replace: true });
+            return;
+        }
+
         const fetchProfile = async () => {
+            if (!email) {
+                setError('Student email is required');
+                setLoading(false);
+                return;
+            }
+
             try {
-                const res = await getStudentProfileApi(id);
-                setProfile(res.data);
+                const res = await getStudentProfileByEmailForEmployer(email);
+                setProfile(res.data?.data || null);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to load student profile');
             } finally {
@@ -23,7 +35,7 @@ const ViewStudentProfile = () => {
             }
         };
         fetchProfile();
-    }, [id]);
+    }, [email, state, navigate]);
 
     if (loading) return <div className="loading-container" style={{ padding: '120px', textAlign: 'center' }}><h2>Loading professional profile...</h2></div>;
 
@@ -51,7 +63,7 @@ const ViewStudentProfile = () => {
                         </div>
                         <div className="prof-title-group">
                             <h1>{profile?.firstName} {profile?.lastName}</h1>
-                            <p className="headline-text">{profile?.profileHeadline || 'Student'}</p>
+                            <p className="headline-text">{profile?.currentPosition || 'Student'}</p>
                             <div className="prof-contact-meta">
                                 <span>{profile?.phone || 'No phone'}</span> • <span>{profile?.email}</span>
                             </div>
@@ -69,41 +81,40 @@ const ViewStudentProfile = () => {
                 <div className="prof-main-layout">
                     <main className="prof-content" style={{ width: '100%' }}>
                         {/* Academic Profile */}
-                        {(profile.university || profile.degree) && (
+                        {(profile.currentPosition || profile.educationItems?.length > 0) && (
                             <Section title="Academic Core" icon={<FaGraduationCap />} isStarted={true}>
                                 <div className="data-display" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <strong>{profile.university}</strong>
-                                    {profile.degree && <span>Degree: {profile.degree}</span>}
-                                    {profile.department && <span>Department: {profile.department}</span>}
-                                    {profile.year && <span>Year of Study: {profile.year}</span>}
+                                    <strong>{profile.currentPosition || 'Student'}</strong>
+                                    {profile.educationItems?.[0]?.title && <span>Degree: {profile.educationItems[0].title}</span>}
+                                    {profile.educationItems?.[0]?.institution && <span>Institution: {profile.educationItems[0].institution}</span>}
                                 </div>
                             </Section>
                         )}
                         
                         {/* Target Job */}
-                        {profile.targetJob?.title && (
+                        {profile.targetJob?.jobTitle && (
                             <Section title="Target Job" icon={<FaCheckCircle />} isStarted={true}>
                                 <div className="data-display">
-                                    <strong>{profile.targetJob.title}</strong>
-                                    <p>{profile.targetJob.jobType} • {profile.targetJob.location}</p>
+                                    <strong>{profile.targetJob.jobTitle}</strong>
+                                    <p>{profile.targetJob.contractType || 'Any contract'} • {profile.targetJob.desiredLocation || 'Any location'}</p>
                                 </div>
                             </Section>
                         )}
 
                         {/* Bio */}
-                        {profile.bio && (
+                        {profile.targetJob?.summary && (
                             <Section title="About" icon={<FaCheckCircle />} isStarted={true}>
-                                <p>{profile.bio}</p>
+                                <p>{profile.targetJob.summary}</p>
                             </Section>
                         )}
 
                         {/* Work Experience */}
-                        <Section title="Work Experience" icon={<FaCheckCircle />} isStarted={profile.workExperience?.length > 0}>
-                            {profile.workExperience?.map((work, i) => (
+                        <Section title="Work Experience" icon={<FaCheckCircle />} isStarted={profile.workExperiences?.length > 0}>
+                            {profile.workExperiences?.map((work, i) => (
                                 <div key={i} className="data-item">
                                     <div className="item-header">
-                                        <strong>{work.role} at {work.company}</strong>
-                                        <span>{new Date(work.startDate).getFullYear()} - {work.current ? 'Present' : new Date(work.endDate).getFullYear()}</span>
+                                        <strong>{work.jobTitle || 'Role'} at {work.companyName || 'Company'}</strong>
+                                        <span>{work.startDate || 'Start'} - {work.currentlyWorking ? 'Present' : (work.endDate || 'End')}</span>
                                     </div>
                                     <p>{work.description}</p>
                                 </div>
@@ -111,12 +122,12 @@ const ViewStudentProfile = () => {
                         </Section>
 
                         {/* Education */}
-                        <Section title="Education & Qualifications" icon={<FaCheckCircle />} isStarted={profile.education?.length > 0}>
-                            {profile.education?.map((edu, i) => (
+                        <Section title="Education & Qualifications" icon={<FaCheckCircle />} isStarted={profile.educationItems?.length > 0}>
+                            {profile.educationItems?.map((edu, i) => (
                                 <div key={i} className="data-item">
                                     <div className="item-header">
-                                        <strong>{edu.degree} in {edu.fieldOfStudy}</strong>
-                                        <span>{edu.institution} ({edu.endDate})</span>
+                                        <strong>{edu.level || 'Qualification'} in {edu.title || 'Title'}</strong>
+                                        <span>{edu.institution || 'Institution'} ({edu.toDate || 'Present'})</span>
                                     </div>
                                 </div>
                             ))}
@@ -130,28 +141,33 @@ const ViewStudentProfile = () => {
                         </Section>
 
                         {/* Projects (Additive) */}
-                        <Section title="Projects" icon={<FaProjectDiagram />} isStarted={profile.projects?.length > 0}>
-                            {profile.projects?.map((proj, i) => (
+                        <Section title="Projects" icon={<FaProjectDiagram />} isStarted={Boolean(profile.educationItems?.find((item) => item.projectsInvolved))}>
+                            {profile.educationItems?.filter((item) => item.projectsInvolved).map((proj, i) => (
                                 <div key={i} className="data-item">
                                     <div className="item-header">
-                                        <strong>{proj.title}</strong>
-                                        {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontSize: '13px' }}>View Project</a>}
+                                        <strong>{proj.title || 'Academic Project'}</strong>
                                     </div>
-                                    <p>{proj.description}</p>
+                                    <p>{proj.projectsInvolved}</p>
                                 </div>
                             ))}
                         </Section>
 
                         {/* Certifications (Additive) */}
-                        <Section title="Certifications" icon={<FaCheckCircle />} isStarted={profile.certifications?.length > 0}>
-                            {profile.certifications?.map((cert, i) => (
-                                <div key={i} className="data-item">
-                                    <div className="item-header">
-                                        <strong>{cert.name}</strong>
-                                        <span>{cert.issuer} ({new Date(cert.date).getFullYear()})</span>
-                                    </div>
+                        <Section title="Certifications" icon={<FaCheckCircle />} isStarted={Boolean(profile.otherAssets?.website || profile.otherAssets?.linkedin || profile.otherAssets?.github)}>
+                            <div className="data-item">
+                                <div className="item-header">
+                                    <strong>Professional Links</strong>
                                 </div>
-                            ))}
+                                <p>
+                                    {profile.otherAssets?.linkedin ? `LinkedIn: ${profile.otherAssets.linkedin}` : 'LinkedIn not provided'}
+                                </p>
+                                <p>
+                                    {profile.otherAssets?.github ? `GitHub: ${profile.otherAssets.github}` : 'GitHub not provided'}
+                                </p>
+                                <p>
+                                    {profile.otherAssets?.website ? `Website: ${profile.otherAssets.website}` : 'Website not provided'}
+                                </p>
+                            </div>
                         </Section>
 
 
@@ -159,7 +175,7 @@ const ViewStudentProfile = () => {
                         {/* Languages */}
                         <Section title="Languages" icon={<FaCheckCircle />} isStarted={profile.languages?.length > 0}>
                             <div className="language-list">
-                                {profile.languages?.map(l => <span key={l.language}>{l.language} ({l.proficiency})</span>)}
+                                {profile.languages?.map((l) => <span key={l}>{l}</span>)}
                             </div>
                         </Section>
                     </main>

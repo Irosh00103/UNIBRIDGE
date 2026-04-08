@@ -49,3 +49,5 @@ export const deleteSelectedAlertsApi = (ids) =>
 // Profile Services
 export const getProfileByEmail = (email) => API.get("/uni/students/profile"); // We ignore email and use token identity for security
 export const saveProfile = (payload) => API.put("/uni/students/profile", payload);
+export const getStudentProfileByEmailForEmployer = (email) =>
+  API.get('/uni/employers/students/search', { params: { email } });

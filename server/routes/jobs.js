@@ -36,7 +36,8 @@ router.post('/', async (req, res) => {
             title, description, deadline, company, venue, applyLink,
             location, type, salary, category, workMode, experience,
             qualification, sideSummary, overview, postedDate,
-            responsibilities, requirements, skills, screeningQuestions, logo
+            responsibilities, requirements, skills, screeningQuestions, logo,
+            salaryRange, jobType, questions
         } = req.body;
         
         if (!title || !description) {
@@ -57,7 +58,9 @@ router.post('/', async (req, res) => {
             deadline: deadline ? new Date(deadline) : undefined,
             location: location || '',
             type: type || '',
+            jobType: jobType || type || '',
             salary: salary || '',
+            salaryRange: salaryRange || '',
             category: category || '',
             portalCategory,
             workMode: workMode || '',
@@ -68,6 +71,7 @@ router.post('/', async (req, res) => {
             postedDate: postedDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             responsibilities: responsibilities || [],
             requirements: requirements || [],
+            questions: questions || [],
             skills: skills || [],
             screeningQuestions: screeningQuestions || [],
             logo: logo || '',

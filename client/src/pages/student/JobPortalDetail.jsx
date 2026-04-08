@@ -208,15 +208,15 @@ function JobPortalDetail() {
               <div className="side-meta-list">
                 <div className="side-meta-item">
                   <FaMapMarkerAlt />
-                  <span>{job.location}</span>
+                  <span>{job.location || job.venue || 'Location not specified'}</span>
                 </div>
                 <div className="side-meta-item">
                   <FaCalendarAlt />
-                  <span>Posted on {job.postedDate}</span>
+                  <span>Posted on {job.postedDate || new Date(job.createdAt || Date.now()).toLocaleDateString('en-GB')}</span>
                 </div>
                 <div className="side-meta-item">
                   <FaBriefcase />
-                  <span>{job.type}</span>
+                  <span>{job.type || job.jobType || 'Open'}</span>
                 </div>
               </div>
 
@@ -227,19 +227,23 @@ function JobPortalDetail() {
               <div className="mini-overview-table">
                 <div className="mini-overview-row">
                   <span>Education</span>
-                  <strong>{job.qualification}</strong>
+                  <strong>{job.qualification || 'Not specified'}</strong>
                 </div>
                 <div className="mini-overview-row">
                   <span>Experience</span>
-                  <strong>{job.experience}</strong>
+                  <strong>{job.experience || 'Not specified'}</strong>
                 </div>
                 <div className="mini-overview-row">
                   <span>Work Mode</span>
-                  <strong>{job.workMode}</strong>
+                  <strong>{job.workMode || 'Not specified'}</strong>
                 </div>
                 <div className="mini-overview-row">
                   <span>Category</span>
-                  <strong>{job.category}</strong>
+                  <strong>{job.category || 'Not specified'}</strong>
+                </div>
+                <div className="mini-overview-row">
+                  <span>Salary</span>
+                  <strong>{job.salaryRange || job.salary || 'Not specified'}</strong>
                 </div>
               </div>
 
