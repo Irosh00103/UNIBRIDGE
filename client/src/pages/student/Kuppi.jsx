@@ -16,6 +16,7 @@ const Kuppi = () => {
     const [formData, setFormData] = useState({
         title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
     });
+    const today = new Date().toISOString().split('T')[0];
 
     const fetchPosts = async () => {
         try {
@@ -35,6 +36,12 @@ const Kuppi = () => {
 
     const createPost = async (e) => {
         e.preventDefault();
+        setError('');
+        const sessionDateTime = new Date(`${formData.date}T${formData.time || '12:00'}:00`);
+        if (Number.isNaN(sessionDateTime.getTime()) || sessionDateTime <= new Date()) {
+            setError('Please select a future date and time for your Kuppi session.');
+            return;
+        }
         try {
             await axios.post(`${API}/posts`, { ...formData, date: `${formData.date}T${formData.time || '12:00'}:00` });
             setFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
@@ -116,7 +123,7 @@ const Kuppi = () => {
                             </div>
                             <div className="form-group">
                                 <label>Date</label>
-                                <input required type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+                                <input required min={today} type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
                             </div>
                             <div className="form-group">
                                 <label>Time</label>

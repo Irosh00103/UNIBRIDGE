@@ -1,0 +1,70 @@
+/* ── All Jobs Page ── */
+.jp-all { padding: 100px 24px 60px; max-width: 1400px; margin: 0 auto; }
+
+.jp-all-header { margin-bottom: 32px; }
+.jp-all-header h1 { font-size: 36px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+.jp-all-header h1 span { color: var(--primary); }
+.jp-all-header p { color: var(--text-muted); margin-top: 8px; font-size: 15px; }
+
+/* Filters */
+.jp-filters {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px;
+  padding: 20px; background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+.jp-filter-input, .jp-filter-select {
+  padding: 10px 16px; border: 2px solid var(--border-light);
+  border-radius: var(--radius-full); font-size: 14px; background: var(--bg-input);
+  outline: none; min-width: 160px; transition: border-color var(--transition-fast);
+}
+.jp-filter-input:focus, .jp-filter-select:focus { border-color: var(--primary); }
+.jp-filter-clear {
+  padding: 10px 20px; background: var(--bg-input); border: 1px solid var(--border-light);
+  border-radius: var(--radius-full); font-size: 14px; cursor: pointer; color: var(--text-muted);
+  font-weight: 600; transition: all var(--transition-fast);
+}
+.jp-filter-clear:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+
+.jp-results-count { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+/* Saved Jobs Page */
+.jp-saved { padding: 100px 24px 60px; max-width: 1200px; margin: 0 auto; }
+.jp-saved-header { margin-bottom: 32px; }
+.jp-saved-header h1 { font-size: 36px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+.jp-saved-header h1 span { color: var(--primary); }
+
+.jp-saved-list { display: flex; flex-direction: column; gap: 16px; }
+.jp-saved-card {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 24px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+.jp-saved-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.jp-saved-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.jp-saved-info p { font-size: 14px; color: var(--text-muted); }
+.jp-saved-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+/* Applications Page */
+.jp-apps { padding: 100px 24px 60px; max-width: 1200px; margin: 0 auto; }
+.jp-apps-header { margin-bottom: 32px; }
+.jp-apps-header h1 { font-size: 36px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+.jp-apps-header h1 span { color: var(--primary); }
+
+.jp-apps-list { display: flex; flex-direction: column; gap: 16px; }
+.jp-app-card {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 24px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+.jp-app-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.jp-app-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.jp-app-info p { font-size: 14px; color: var(--text-muted); }
+.jp-app-info .jp-ref { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+
+@media (max-width: 768px) {
+  .jp-filters { flex-direction: column; }
+  .jp-filter-input, .jp-filter-select { width: 100%; }
+  .jp-saved-card, .jp-app-card { flex-direction: column; align-items: flex-start; }
+}

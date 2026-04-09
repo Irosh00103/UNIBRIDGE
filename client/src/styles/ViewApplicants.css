@@ -1,0 +1,314 @@
+.applicants-page {
+  padding-top: 92px;
+  padding-bottom: 56px;
+}
+
+.applicants-back-row {
+  margin-bottom: 18px;
+}
+
+.applicants-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.applicants-back-link:hover {
+  color: var(--primary);
+}
+
+.applicants-hero {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(79, 70, 229, 0.14), transparent 45%),
+    radial-gradient(circle at 12% 100%, rgba(236, 72, 153, 0.12), transparent 42%),
+    var(--bg-card);
+}
+
+.applicants-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 7px 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+}
+
+.applicants-hero-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.applicants-hero-main h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+  line-height: 1.08;
+}
+
+.applicants-hero-main p {
+  max-width: 720px;
+  color: var(--text-muted);
+}
+
+.applicants-hero-meta {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 230px;
+}
+
+.applicants-hero-meta span {
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  text-align: right;
+}
+
+.applicants-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.applicants-search-card {
+  margin-bottom: 22px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.applicants-search-head h2 {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.applicants-search-head p {
+  color: var(--text-muted);
+  max-width: 680px;
+  font-size: 14px;
+}
+
+.applicants-search-form {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.applicants-search-form input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  outline: none;
+}
+
+.applicants-search-form input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.applicants-stat-card {
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.applicants-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.applicants-stat-content h3 {
+  font-size: 26px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.applicants-stat-content p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.applicants-stat-card.neutral .applicants-stat-icon {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.applicants-stat-card.pending .applicants-stat-icon {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.applicants-stat-card.selected .applicants-stat-icon {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.applicants-stat-card.rejected .applicants-stat-icon {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.applicants-empty {
+  text-align: center;
+  padding: 52px 28px;
+}
+
+.applicants-empty-graphic {
+  width: 74px;
+  height: 74px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--primary-light), #eef2ff);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin-bottom: 16px;
+}
+
+.applicants-empty h2 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.applicants-empty p {
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--text-muted);
+}
+
+.applicants-empty-hint {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-main);
+  color: var(--text-muted);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.applicants-table-shell {
+  padding: 0;
+  overflow: hidden;
+}
+
+.applicants-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding: 18px 22px;
+}
+
+.applicants-table-header h2 {
+  font-size: 22px;
+}
+
+.applicants-table-header span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.applicant-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.applicant-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.applicants-cv-link {
+  font-weight: 600;
+}
+
+.applicants-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.applicants-decided {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .applicants-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .applicants-page {
+    padding-top: 84px;
+  }
+
+  .applicants-hero-main h1 {
+    font-size: 28px;
+  }
+
+  .applicants-hero-meta {
+    width: 100%;
+  }
+
+  .applicants-hero-meta span {
+    text-align: left;
+  }
+
+  .applicants-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .applicants-search-form {
+    max-width: none;
+    flex-direction: column;
+  }
+}

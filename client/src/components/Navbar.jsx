@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { FaBell, FaChevronDown, FaUserCircle, FaCog, FaSignOutAlt, FaBriefcase, FaHome } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import './Navbar.css';
+import '../styles/Navbar.css';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -13,6 +14,9 @@ const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const notificationRef = useRef(null);
+    const profileRef = useRef(null);
 
     // Handle scroll effect for navbar background
     useEffect(() => {
@@ -36,39 +40,98 @@ const Navbar = () => {
         const fetchNotifications = async () => {
             if (!user) return;
             try {
+                // Primary endpoint for the unified system
                 const res = await axios.get('http://localhost:5000/api/notifications');
-                setNotifications(res.data.data || []);
-                setUnreadCount(res.data.unreadCount || 0);
+                if (res.data.success) {
+                    setNotifications(res.data.data || []);
+                    setUnreadCount(res.data.unreadCount || 0);
+                } else {
+                    // Fallback or handle legacy array format if exists
+                    const list = Array.isArray(res.data) ? res.data : [];
+                    setNotifications(list);
+                    setUnreadCount(list.filter(n => !n.isRead).length);
+                }
             } catch (err) {
-                setNotifications([]);
-                setUnreadCount(0);
+                console.error("Error fetching notifications:", err);
+                // Attempt legacy endpoint if primary fails
+                try {
+                    const resLegacy = await axios.get('http://localhost:5000/api/uni/notifications');
+                    const list = Array.isArray(resLegacy.data) ? resLegacy.data : [];
+                    setNotifications(list);
+                    setUnreadCount(list.filter(n => !n.isRead).length);
+                } catch (legacyErr) {
+                    setNotifications([]);
+                    setUnreadCount(0);
+                }
             }
         };
+        
         fetchNotifications();
+        // Refresh notifications every 60 seconds
+        const interval = setInterval(fetchNotifications, 60000);
+        return () => clearInterval(interval);
     }, [user, location.pathname]);
+
+    // Close notifications panel and profile dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setShowProfileDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const markAllAsRead = async (e) => {
+        if (e) e.stopPropagation();
+        if (unreadCount === 0) return;
+        
+        try {
+            await axios.patch('http://localhost:5000/api/notifications/read-all');
+            setUnreadCount(0);
+            setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        } catch (err) {
+            // Fallback for legacy PUT endpoint
+            try {
+                await axios.put('http://localhost:5000/api/uni/notifications/read-all');
+                setUnreadCount(0);
+                setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+            } catch (innerErr) {
+                console.error("Failed to mark all as read:", innerErr);
+            }
+        }
+    };
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
     };
 
-    const openNotifications = async () => {
-        setShowNotifications((prev) => !prev);
-        if (unreadCount > 0) {
-            try {
-                await axios.patch('http://localhost:5000/api/notifications/read-all');
-                setUnreadCount(0);
-                setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-            } catch (err) {
-                // no-op
-            }
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+    };
+
+    const handleViewAllNotifications = () => {
+        setShowNotifications(false);
+        if (user?.role === 'admin') {
+            navigate('/admin/notifications');
+        } else {
+            navigate('/student/notifications');
         }
+    };
+
+    const handleProfileButtonClick = () => {
+        setShowProfileDropdown(!showProfileDropdown);
     };
 
     return (
         <nav className={`navbar-marvel ${scrolled ? 'navbar-scrolled' : ''}`}>
             <div className="navbar-container">
                 <Link
-                    to={user ? (user.role === 'student' ? '/student/home' : '/admin/dashboard') : '/'}
+                    to={user ? (user.role === 'student' ? '/student/home' : user.role === 'employer' ? '/employer/dashboard' : '/admin/dashboard') : '/'}
                     className="navbar-logo"
                 >
                     <span className="logo-icon">🎓</span>
@@ -96,46 +159,139 @@ const Navbar = () => {
                             {user.role === 'student' ? (
                                 <>
                                     <Link to="/" className="navbar-link">Home</Link>
-                                    <Link to="/student/materials" className="navbar-link">Materials</Link>
-                                    <Link to="/student/materials/upload" className="navbar-link">Upload</Link>
-                                    <Link to="/student/jobs" className="navbar-link">Job Market</Link>
+                                    <Link to="/student/materials" className="navbar-link">Lecture Hub</Link>
+                                    <Link to="/student/job-portal" className="navbar-link">Job Portal</Link>
+                                    <Link to="/student/job-portal/saved" className="navbar-link">Saved Jobs</Link>
+                                    <Link to="/student/job-portal/applications" className="navbar-link">Applications</Link>
+
+
                                     <Link to="/student/kuppi" className="navbar-link">Kuppi</Link>
-                                    <div className="navbar-notification" onClick={openNotifications} role="button" tabIndex={0}>
-                                        🔔
+                                    <div className="navbar-notification" onClick={toggleNotifications} role="button" tabIndex={0} title="Notifications" ref={notificationRef}>
+                                        <span className="notification-bell-icon">🔔</span>
                                         {unreadCount > 0 && <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                                         {showNotifications && (
-                                            <div className="notification-panel">
-                                                {notifications.length === 0 ? (
-                                                    <div className="notification-item muted">No notifications yet.</div>
-                                                ) : (
-                                                    notifications.slice(0, 8).map((n) => (
-                                                        <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
-                                                            <strong>{n.title}</strong>
-                                                            <div>{n.message}</div>
-                                                        </div>
-                                                    ))
-                                                )}
+                                            <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
+                                                <div className="notification-header">
+                                                    <h3>Notifications</h3>
+                                                    {unreadCount > 0 && (
+                                                        <button className="mark-all-read" onClick={markAllAsRead}>
+                                                            Mark all as read
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="notification-list">
+                                                    {notifications.length === 0 ? (
+                                                        <div className="notification-item muted">No notifications yet.</div>
+                                                    ) : (
+                                                        notifications.slice(0, 10).map((n) => (
+                                                            <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
+                                                                <div className="notification-content">
+                                                                    <strong>{n.title}</strong>
+                                                                    <div className="notification-msg">{n.message}</div>
+                                                                    <div className="notification-time">
+                                                                        {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                                <div className="notification-footer">
+                                                    <button className="notification-view-btn" onClick={handleViewAllNotifications}>
+                                                        View
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 </>
+                            ) : user.role === 'employer' ? (
+                                <>
+                                    <Link to="/" className="navbar-link">Home</Link>
+                                    <Link to="/employer/dashboard" className="navbar-link">Dashboard</Link>
+                                    <Link to="/employer/jobs/create" className="navbar-link">Post Job</Link>
+                                </>
                             ) : (
                                 <>
                                     <Link to="/" className="navbar-link">Home</Link>
-                                    <Link to="/employer/jobs/create" className="navbar-link">Post Job</Link>
+                                    <Link to="/admin/dashboard" className="navbar-link">Dashboard</Link>
+                                    <Link to="/admin/lecture-hub" className="navbar-link">Lecture Hub</Link>
+                                    <div className="navbar-notification" onClick={toggleNotifications} role="button" tabIndex={0} title="Notifications" ref={notificationRef}>
+                                        <span className="notification-bell-icon">🔔</span>
+                                        {unreadCount > 0 && <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                        {showNotifications && (
+                                            <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
+                                                <div className="notification-header">
+                                                    <h3>Notifications</h3>
+                                                    {unreadCount > 0 && (
+                                                        <button className="mark-all-read" onClick={markAllAsRead}>
+                                                            Mark all as read
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="notification-list">
+                                                    {notifications.length === 0 ? (
+                                                        <div className="notification-item muted">No notifications yet.</div>
+                                                    ) : (
+                                                        notifications.slice(0, 10).map((n) => (
+                                                            <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
+                                                                <div className="notification-content">
+                                                                    <strong>{n.title}</strong>
+                                                                    <div className="notification-msg">{n.message}</div>
+                                                                    <div className="notification-time">
+                                                                        {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                                <div className="notification-footer">
+                                                    <button className="notification-view-btn" onClick={handleViewAllNotifications}>
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             )}
-                            <button
-                                onClick={() => navigate(user?.role === 'student' ? '/student/home' : '/admin/dashboard')}
-                                className="profile-btn"
-                                title="Go to Dashboard"
-                            >
-                                <div className="profile-avatar">
-                                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                                <span>{user?.name?.split(' ')[0] || 'Profile'}</span>
-                            </button>
-                            <button onClick={logout} className="btn btn-outline" style={{marginLeft: '12px'}}>Logout</button>
+                            {/* Profile Dropdown */}
+                            <div className="profile-dropdown-container" ref={profileRef}>
+                                <button
+                                    onClick={handleProfileButtonClick}
+                                    className="profile-btn"
+                                    title="Profile Menu"
+                                >
+                                    <div className="profile-avatar">
+                                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                    <span className="profile-name-nav">{user?.name?.split(' ')[0]}</span>
+                                    <FaChevronDown style={{ fontSize: '10px', opacity: 0.5 }} />
+                                </button>
+
+                                {showProfileDropdown && (
+                                    <div className="profile-dropdown-menu">
+                                        {user?.role === 'student' && (
+                                            <button className="profile-dropdown-item" onClick={() => { navigate('/student/home'); setShowProfileDropdown(false); }}>
+                                                <FaHome /> UserDashboard
+                                            </button>
+                                        )}
+                                        {user?.role === 'student' && (
+                                            <button className="profile-dropdown-item" onClick={() => { navigate('/student/profile/professional'); setShowProfileDropdown(false); }}>
+                                                <FaBriefcase /> Professional Profile
+                                            </button>
+                                        )}
+                                        <button className="profile-dropdown-item" onClick={() => { navigate('/profile'); setShowProfileDropdown(false); }}>
+                                            <FaUserCircle /> Account Settings
+                                        </button>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="profile-dropdown-item" style={{ color: 'var(--danger)' }} onClick={() => { logout(); setShowProfileDropdown(false); }}>
+                                            <FaSignOutAlt /> Logout
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </>
                     )}
                 </div>
