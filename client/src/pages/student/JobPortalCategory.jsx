@@ -15,7 +15,7 @@ import {
   mapJobToPortalCategory,
   filterJobs,
 } from "../../data/jobsData";
-import "./JobCategoryPage.css";
+import "../../styles/JobCategoryPage.css";
 
 const initialFilters = {
   keyword: "",

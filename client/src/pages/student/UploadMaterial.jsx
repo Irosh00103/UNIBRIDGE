@@ -46,15 +46,15 @@ const UploadMaterial = () => {
         setLoading(true);
         try {
             const payload = { ...formData, link: formData.link.trim() };
-            const res = await axios.post('http://localhost:5000/api/materials', payload);
+            const res = await axios.post('http://localhost:5000/api/materials/admin/publish', payload);
             if (res.data.success) {
-                setSuccessMsg('Material uploaded successfully!');
+                setSuccessMsg('Material published successfully!');
                 setFormData({ title: '', module: '', description: '', type: 'PDF', link: '' });
                 setErrors({});
-                setTimeout(() => navigate('/student/materials'), 1500);
+                setTimeout(() => navigate('/admin/lecture-hub'), 1500);
             }
         } catch (err) {
-            setApiError(err.response?.data?.message || 'Failed to upload material');
+            setApiError(err.response?.data?.message || 'Failed to publish material');
         } finally {
             setLoading(false);
         }
@@ -74,13 +74,13 @@ const UploadMaterial = () => {
     return (
         <div className="materials-container fade-in-up">
             <div style={{ marginBottom: '24px' }}>
-                <Link to="/student/materials" style={{ textDecoration: 'none', color: 'var(--text-muted)', fontSize: '15px', fontWeight: '600' }}>← Back to Materials</Link>
+                <Link to="/admin/lecture-hub" style={{ textDecoration: 'none', color: 'var(--text-muted)', fontSize: '15px', fontWeight: '600' }}>← Back to Lecture Hub</Link>
             </div>
             
             <div className="materials-header" style={{ justifyContent: 'center', marginBottom: '40px' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <h1 className="materials-title">Share Knowledge</h1>
-                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Upload your study materials or reference links to help your peers succeed.</p>
+                    <h1 className="materials-title">Publish Study Material</h1>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Admins can directly publish approved resources for students.</p>
                 </div>
             </div>
 
@@ -129,7 +129,7 @@ const UploadMaterial = () => {
                     </div>
                     
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px' }} disabled={loading}>
-                        {loading ? 'Uploading safely...' : 'Publish Material'}
+                        {loading ? 'Publishing...' : 'Publish Material'}
                     </button>
                 </form>
             </div>

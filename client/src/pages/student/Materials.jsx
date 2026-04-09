@@ -1,174 +1,235 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/materials.css';
 
+const StatCard = ({ label, value, icon }) => (
+  <div className="card-soft">
+    <div className="text-3xl">{icon}</div>
+    <div className="mt-2 text-2xl font-bold text-slate-900">{value}</div>
+    <div className="text-sm text-slate-600">{label}</div>
+  </div>
+);
+
+const QuickActionCard = ({ to, title, description, icon }) => {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(to)}
+      className="card-soft text-left hover:shadow-lg hover:border-blue-300 transition-all duration-200"
+    >
+      <div className="text-3xl">{icon}</div>
+      <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm text-slate-600">{description}</p>
+    </button>
+  );
+};
+
+const EmptyState = ({ title, description, icon = '📚' }) => (
+  <div className="card-soft text-center py-8">
+    <div className="text-4xl mb-3">{icon}</div>
+    <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
+    <p className="mt-1 text-sm text-slate-600">{description}</p>
+  </div>
+);
+
+const isAdminRole = (role) => role === 'admin';
+
 const Materials = () => {
-    const [materials, setMaterials] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [search, setSearch] = useState('');
-    const [sort, setSort] = useState('newest');
-    const [commentInput, setCommentInput] = useState({});
-    const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [mySubmissions, setMySubmissions] = useState([]);
+  const [sessions, setSessions] = useState([]);
 
-    const fetchMaterials = async (q = search, s = sort) => {
-        try {
-            setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/materials', { params: { search: q, sort: s } });
-            setMaterials(res.data.data);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to load materials');
-        } finally {
-            setLoading(false);
-        }
+  const fetchStudentData = async () => {
+    try {
+      const [materialsRes, sessionsRes] = await Promise.allSettled([
+        axios.get('http://localhost:5000/api/materials/my-submissions'),
+        axios.get('http://localhost:5000/api/kuppi/posts')
+      ]);
+
+      if (materialsRes.status === 'fulfilled') {
+        setMySubmissions(materialsRes.value.data.data || []);
+      }
+
+      if (sessionsRes.status === 'fulfilled') {
+        setSessions(sessionsRes.value.data.data || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    if (isAdminRole(user.role)) {
+      setLoading(false);
+      return;
+    }
+    fetchStudentData();
+  }, [user]);
+
+  const studentStats = useMemo(() => {
+    return {
+      uploaded: mySubmissions.length,
+      downloads: 0,
+      viewed: 0
     };
+  }, [mySubmissions]);
 
-    useEffect(() => {
-        fetchMaterials('', 'newest');
-    }, []);
+  const sessionStats = useMemo(() => {
+    const now = new Date();
+    const todayKey = now.toISOString().slice(0, 10);
 
-    const getTypeIcon = (type) => {
-        const t = type.toLowerCase();
-        if (t === 'pdf') return '📄';
-        if (t === 'ppt') return '📊';
-        if (t === 'docx') return '📝';
-        if (t === 'video') return '🎬';
-        return '📁';
-    };
+    return sessions.reduce(
+      (accumulator, session) => {
+        const dateValue = new Date(session.date);
+        if (Number.isNaN(dateValue.getTime())) return accumulator;
 
-    const reactMaterial = async (id, action) => {
-        try {
-            const res = await axios.post(`http://localhost:5000/api/materials/${id}/${action}`);
-            setMaterials((prev) => prev.map((m) => (
-                m._id === id ? { ...m, likes: res.data.likes, dislikes: res.data.dislikes, userLiked: action === 'like' && !m.userLiked, userDisliked: action === 'dislike' && !m.userDisliked } : m
-            )));
-            fetchMaterials();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Action failed');
-        }
-    };
+        const sessionKey = dateValue.toISOString().slice(0, 10);
+        if (sessionKey > todayKey) accumulator.upcoming += 1;
+        else if (sessionKey === todayKey) accumulator.ongoing += 1;
+        else accumulator.completed += 1;
 
-    const commentMaterial = async (id) => {
-        const text = (commentInput[id] || '').trim();
-        if (!text) return;
-        try {
-            const res = await axios.post(`http://localhost:5000/api/materials/${id}/comments`, { text });
-            setMaterials((prev) => prev.map((m) => (
-                m._id === id ? { ...m, comments: res.data.comments } : m
-            )));
-            setCommentInput((prev) => ({ ...prev, [id]: '' }));
-        } catch (err) {
-            setError(err.response?.data?.message || 'Comment failed');
-        }
-    };
-
-    return (
-        <div className="materials-container fade-in-up">
-            <div className="materials-header">
-                <div>
-                    <h1 className="materials-title">Study Materials</h1>
-                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Access and share lecture notes, past papers, and video resources.</p>
-                </div>
-                <button className="btn btn-primary" onClick={() => navigate('/student/materials/upload')}>+ Upload Material</button>
-            </div>
-            
-            <div className="filter-bar">
-                <input
-                    className="search-input"
-                    placeholder="Search by title, module, keyword..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') fetchMaterials(search, sort); }}
-                />
-                <select className="sort-select" value={sort} onChange={(e) => {
-                    setSort(e.target.value);
-                    fetchMaterials(search, e.target.value);
-                }}>
-                    <option value="newest">Newest First</option>
-                    <option value="likes">Most Liked</option>
-                    <option value="module">Sort by Module</option>
-                </select>
-                <button className="btn btn-primary filter-btn" onClick={() => fetchMaterials(search, sort)}>Search</button>
-            </div>
-
-            {error && <div className="alert alert-error">{error}</div>}
-
-            {loading ? (
-                <div className="loading">Loading materials...</div>
-            ) : materials.length === 0 ? (
-                <div className="empty-state">
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-                    <h3>No materials found</h3>
-                    <p>Be the first to upload a resource for your peers!</p>
-                </div>
-            ) : (
-                <div className="materials-grid">
-                    {materials.map(mat => (
-                        <div key={mat._id} className="material-card">
-                            <div className="material-header">
-                                <span className={`badge badge-type badge-${mat.type.toLowerCase()}`}>{mat.type}</span>
-                                <div className="material-type-icon">{getTypeIcon(mat.type)}</div>
-                            </div>
-                            
-                            <h3 className="material-title">{mat.title}</h3>
-                            <div className="material-module">{mat.module}</div>
-                            
-                            <p className="material-desc">{mat.description || 'No description provided.'}</p>
-                            
-                            <div className="material-footer">
-                                <div className="uploader-avatar">
-                                    {mat.studentName?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                                Uploaded by {mat.studentName || 'Student'}
-                            </div>
-
-                            <a href={mat.link} target="_blank" rel="noopener noreferrer" className="link-btn">
-                                🔗 Open External Link
-                            </a>
-
-                            <div className="interaction-row">
-                                <button className={`react-btn ${mat.userLiked ? 'liked' : ''}`} onClick={() => reactMaterial(mat._id, 'like')}>
-                                    👍 {mat.likesCount || mat.likes?.length || 0}
-                                </button>
-                                <button className={`react-btn ${mat.userDisliked ? 'disliked' : ''}`} onClick={() => reactMaterial(mat._id, 'dislike')}>
-                                    👎 {mat.dislikesCount || mat.dislikes?.length || 0}
-                                </button>
-                            </div>
-
-                            <div className="comments-section" style={{ marginTop: '0', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
-                                <h4 style={{ fontSize: '13px', marginBottom: '8px', color: 'var(--text-main)' }}>Comments</h4>
-                                
-                                {mat.comments?.length > 0 && (
-                                    <div className="comment-list" style={{ maxHeight: '120px' }}>
-                                        {mat.comments.slice(-3).map((c) => (
-                                            <div className="comment-item" key={c._id} style={{ padding: '8px' }}>
-                                                <div className="comment-content">
-                                                    <div className="comment-author" style={{ fontSize: '12px' }}>{c.user?.name || 'User'}</div>
-                                                    <div className="comment-text" style={{ fontSize: '13px' }}>{c.text}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                
-                                <div className="comment-input-area" style={{ marginTop: '8px' }}>
-                                    <input 
-                                        className="comment-input" 
-                                        placeholder="Add a comment..." 
-                                        value={commentInput[mat._id] || ''} 
-                                        onChange={(e) => setCommentInput((prev) => ({ ...prev, [mat._id]: e.target.value }))}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') commentMaterial(mat._id); }}
-                                    />
-                                    <button className="btn btn-primary btn-sm" style={{ borderRadius: 'var(--radius-full)' }} onClick={() => commentMaterial(mat._id)}>Post</button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
+        return accumulator;
+      },
+      { upcoming: 0, ongoing: 0, completed: 0 }
     );
+  }, [sessions]);
+
+  const studentActions = [
+    {
+      to: '/student/materials/browse',
+      title: 'Browse Study Materials',
+      description: 'Explore approved resources',
+      icon: '📖'
+    },
+    {
+      to: '/student/materials/submit',
+      title: 'Submit Study Material',
+      description: 'Send your content for review',
+      icon: '📝'
+    }
+  ];
+
+  const adminActions = [
+    {
+      to: '/admin/lecture-hub/manage',
+      title: 'Manage Study Materials',
+      description: 'Review submissions and statuses',
+      icon: '🗂'
+    },
+    {
+      to: '/admin/lecture-hub/modules',
+      title: 'Manage Modules',
+      description: 'Maintain year-semester modules',
+      icon: '🧩'
+    },
+    {
+      to: '/admin/lecture-hub/upload',
+      title: 'Upload Study Material',
+      description: 'Directly publish approved resources',
+      icon: '⬆️'
+    },
+    {
+      to: '/admin/lecture-hub/browse',
+      title: 'Browse Study Materials',
+      description: 'Explore approved resources',
+      icon: '📖'
+    }
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-5">
+        <div className="card-soft loading">Loading Lecture Hub...</div>
+      </div>
+    );
+  }
+
+  if (isAdminRole(user?.role)) {
+    return (
+      <div className="space-y-5">
+        <section className="card-soft bg-gradient-to-r text-white">
+          <h1 className="text-2xl font-semibold">Welcome to Unibridge, Admin 👋</h1>
+          <p className="mt-2 text-sm text-white/90">Manage lecture materials and review student submissions.</p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Quick Actions</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {adminActions.map((action) => (
+              <QuickActionCard key={action.to} {...action} />
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <section className="card-soft bg-gradient-to-r text-white">
+        <h1 className="text-2xl font-semibold">Welcome to Unibridge, {user?.firstName || 'Student'} 👋</h1>
+        <p className="mt-2 text-sm text-white/90">Your academic study materials hub is ready for today.</p>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <StatCard label="Uploaded" value={studentStats.uploaded} icon="📤" />
+        <StatCard label="Downloads" value={studentStats.downloads} icon="⬇️" />
+        <StatCard label="Viewed" value={studentStats.viewed} icon="👁️" />
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">Quick Actions</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {studentActions.map((action) => (
+            <QuickActionCard key={action.to} {...action} />
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-slate-900">Sessions (Upcoming / Ongoing / Completed)</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <StatCard label="Upcoming" value={sessionStats.upcoming} icon="🗓️" />
+          <StatCard label="Ongoing" value={sessionStats.ongoing} icon="🟢" />
+          <StatCard label="Completed" value={sessionStats.completed} icon="✅" />
+        </div>
+        {sessions.length === 0 && (
+          <EmptyState
+            title="No sessions yet"
+            description="Upcoming, ongoing, and completed Kuppi sessions will appear here."
+            icon="📚"
+          />
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">Recent Activity</h2>
+        {mySubmissions.length === 0 ? (
+          <EmptyState
+            title="No recent activity yet"
+            description="Your latest uploads, reviews, and downloads will appear here."
+            icon="📚"
+          />
+        ) : (
+          <div className="space-y-3">
+            {mySubmissions.slice(0, 3).map((item) => (
+              <div key={item._id} className="card-soft">
+                <div className="text-xs text-slate-500">{item.module}</div>
+                <div className="text-base font-semibold text-slate-900">{item.title}</div>
+                <div className="mt-1 text-sm text-slate-600">Status: {item.status}</div>
+                {item.reviewNotes ? <div className="mt-1 text-xs text-slate-600">Notes: {item.reviewNotes}</div> : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 };
 
 export default Materials;

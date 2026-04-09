@@ -10,7 +10,7 @@ import {
     FaFileAlt,
     FaPaperPlane,
 } from 'react-icons/fa';
-import './ViewApplicants.css';
+import '../../styles/ViewApplicants.css';
 
 const ViewApplicants = () => {
     const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import "./AlertsPage.css";
+import "../styles/AlertsPage.css";
 import { useEffect, useMemo, useState } from "react";
 import {
   FaBell,

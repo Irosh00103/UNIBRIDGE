@@ -6,7 +6,7 @@ const notificationSchema = new mongoose.Schema({
     actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     type: {
         type: String,
-        enum: ['kuppi_join', 'kuppi_comment', 'material_comment', 'material_like', 'application_status', 'new_application', 'job_closed'],
+        enum: ['kuppi_join', 'kuppi_comment', 'material_comment', 'material_like', 'material_review', 'material_submitted', 'application_status', 'new_application', 'job_closed'],
         required: true
     },
     title: { type: String, required: true },

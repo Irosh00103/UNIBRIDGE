@@ -1,4 +1,4 @@
-import "./SavedJobsPage.css";
+import "../../styles/SavedJobsPage.css";
 import { useMemo, useState } from "react";
 import {
   FaBookmark,

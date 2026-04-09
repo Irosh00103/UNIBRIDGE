@@ -1,4 +1,4 @@
-import "./ApplicationsPage.css";
+import "../../styles/ApplicationsPage.css";
 import { useMemo, useState } from "react";
 import {
   FaSearch,

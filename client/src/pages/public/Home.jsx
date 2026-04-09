@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../components/Footer';
-import './Home.css';
+import '../../styles/Home.css';
 
 // Custom hook for scroll-triggered animations
 const useInView = (options = { threshold: 0.2, triggerOnce: true }) => {
