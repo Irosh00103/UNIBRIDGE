@@ -113,6 +113,7 @@ function App() {
         
         {/* Employer/Admin Routes */}
         <Route path="/employer/dashboard" element={<ProtectedRoute role="employer"><EmployerDashboard /></ProtectedRoute>} />
+        <Route path="/employer/notifications" element={<ProtectedRoute role="employer"><AlertsPage /></ProtectedRoute>} />
         <Route path="/employer/jobs/create" element={<ProtectedRoute role="employer"><CreateJob /></ProtectedRoute>} />
         <Route path="/employer/jobs/:id/applicants" element={<ProtectedRoute role="employer"><ViewApplicants /></ProtectedRoute>} />
         <Route path="/employer/students/profile" element={<ProtectedRoute role="employer"><ViewStudentProfile /></ProtectedRoute>} />

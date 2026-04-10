@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+const isValidHttpUrl = (value = '') => {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (err) {
+        return false;
+    }
+};
+
 const commentSchema = new mongoose.Schema({
     text: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -8,12 +17,28 @@ const commentSchema = new mongoose.Schema({
 
 const kuppiSchema = new mongoose.Schema({
     student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    title: { type: String, required: true },
-    module: { type: String, required: true },
+    title: { type: String, required: true, trim: true, minlength: 5, maxlength: 120 },
+    module: {
+        type: String,
+        required: true,
+        trim: true,
+        uppercase: true,
+        maxlength: 20,
+        match: [/^[A-Z]{2,6}\d{2,4}[A-Z]?$/, 'Module code must look like PHY101 or CS2040']
+    },
     date: { type: Date, required: true },
-    location: { type: String },
-    description: { type: String },
-    maxParticipants: { type: Number },
+    location: {
+        type: String,
+        trim: true,
+        maxlength: 160,
+        validate: {
+            validator: (value) => !value || isValidHttpUrl(value),
+            message: 'Kuppi link must be a valid http/https URL'
+        }
+    },
+    description: { type: String, required: true, trim: true, minlength: 10, maxlength: 1000 },
+    // Keep backward compatibility for legacy records that stored 0 as "unlimited".
+    maxParticipants: { type: Number, min: 0, max: 500 },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

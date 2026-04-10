@@ -6,6 +6,31 @@ const { protect } = require('../middleware/auth');
 
 router.use(protect);
 
+const MODULE_CODE_PATTERN = /^[A-Z]{2,6}\d{2,4}[A-Z]?$/;
+
+const normalizeSpace = (value = '') => value.trim().replace(/\s+/g, ' ');
+
+const isValidHttpUrl = (value = '') => {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (err) {
+        return false;
+    }
+};
+
+const formatValidationError = (err) => {
+    if (!err || err.name !== 'ValidationError' || !err.errors) {
+        return null;
+    }
+
+    const messages = Object.values(err.errors)
+        .map((fieldError) => fieldError.message)
+        .filter(Boolean);
+
+    return messages.length > 0 ? messages.join('. ') : 'Invalid Kuppi session data';
+};
+
 // Helper: serialize a post with per-user flags
 const serializePost = (post, userId) => {
     const obj = post.toObject ? post.toObject() : post;
@@ -33,6 +58,22 @@ router.get('/posts', async (req, res) => {
     }
 });
 
+// GET /api/kuppi/posts/mine
+router.get('/posts/mine', async (req, res) => {
+    try {
+        const posts = await Kuppi.find({ student: req.user.id })
+            .sort({ createdAt: -1 })
+            .populate('student', 'name avatarUrl')
+            .populate('participants', 'name avatarUrl')
+            .populate('comments.user', 'name avatarUrl');
+
+        const data = posts.map(p => serializePost(p, req.user.id));
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 // POST /api/kuppi/posts
 router.post('/posts', async (req, res) => {
     try {
@@ -42,25 +83,71 @@ router.post('/posts', async (req, res) => {
 
         const { title, module: mod, date, time, location, description, maxParticipants } = req.body;
 
-        if (!title || !mod || !date) {
-            return res.status(400).json({ success: false, message: 'Title, module, and date are required' });
+        const normalizedTitle = normalizeSpace(title || '');
+        const normalizedModule = String(mod || '').trim().toUpperCase();
+        const normalizedLocation = normalizeSpace(location || '');
+        const normalizedDescription = normalizeSpace(description || '');
+        const maxParticipantsRaw = String(maxParticipants || '').trim();
+
+        if (!normalizedTitle) {
+            return res.status(400).json({ success: false, message: 'Session title is required' });
+        }
+        if (normalizedTitle.length < 5 || normalizedTitle.length > 120) {
+            return res.status(400).json({ success: false, message: 'Session title must be between 5 and 120 characters' });
+        }
+
+        if (!normalizedModule) {
+            return res.status(400).json({ success: false, message: 'Module code is required' });
+        }
+        if (normalizedModule.length > 20 || !MODULE_CODE_PATTERN.test(normalizedModule)) {
+            return res.status(400).json({ success: false, message: 'Module code must look like PHY101 or CS2040' });
+        }
+
+        if (!normalizedDescription) {
+            return res.status(400).json({ success: false, message: 'Description is required' });
+        }
+        if (normalizedDescription.length < 10 || normalizedDescription.length > 1000) {
+            return res.status(400).json({ success: false, message: 'Description must be between 10 and 1000 characters' });
+        }
+
+        if (!normalizedLocation) {
+            return res.status(400).json({ success: false, message: 'Kuppi link is required' });
+        }
+        if (normalizedLocation.length > 160) {
+            return res.status(400).json({ success: false, message: 'Kuppi link cannot exceed 160 characters' });
+        }
+        if (!isValidHttpUrl(normalizedLocation)) {
+            return res.status(400).json({ success: false, message: 'Kuppi link must be a valid http/https URL' });
+        }
+
+        let parsedMaxParticipants;
+        if (maxParticipantsRaw) {
+            if (!/^\d+$/.test(maxParticipantsRaw)) {
+                return res.status(400).json({ success: false, message: 'Max participants must be a whole number' });
+            }
+            parsedMaxParticipants = Number(maxParticipantsRaw);
+            if (parsedMaxParticipants < 2 || parsedMaxParticipants > 500) {
+                return res.status(400).json({ success: false, message: 'Max participants must be between 2 and 500' });
+            }
+        }
+
+        if (!date) {
+            return res.status(400).json({ success: false, message: 'Date is required' });
         }
 
         const sessionDate = new Date(date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (sessionDate < today) {
-            return res.status(400).json({ success: false, message: 'Date must be in the future' });
+        if (Number.isNaN(sessionDate.getTime()) || sessionDate <= new Date()) {
+            return res.status(400).json({ success: false, message: 'Date and time must be in the future' });
         }
 
         const post = await Kuppi.create({
             student: req.user.id,
-            title,
-            module: mod,
+            title: normalizedTitle,
+            module: normalizedModule,
             date: sessionDate,
-            location,
-            description,
-            maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
+            location: normalizedLocation || undefined,
+            description: normalizedDescription,
+            maxParticipants: parsedMaxParticipants,
         });
 
         const populated = await Kuppi.findById(post._id)
@@ -69,6 +156,108 @@ router.post('/posts', async (req, res) => {
             .populate('comments.user', 'name avatarUrl');
 
         res.status(201).json({ success: true, data: serializePost(populated, req.user.id) });
+    } catch (err) {
+        const validationMessage = formatValidationError(err);
+        if (validationMessage) {
+            return res.status(400).json({ success: false, message: validationMessage });
+        }
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// PUT /api/kuppi/posts/:id
+router.put('/posts/:id', async (req, res) => {
+    try {
+        const post = await Kuppi.findById(req.params.id);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+        const isOwner = post.student.toString() === req.user.id;
+        if (!isOwner && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized to update this post' });
+        }
+
+        const { title, module: mod, date, location, description, maxParticipants } = req.body;
+
+        const normalizedTitle = normalizeSpace(title || '');
+        const normalizedModule = String(mod || '').trim().toUpperCase();
+        const normalizedLocation = normalizeSpace(location || '');
+        const normalizedDescription = normalizeSpace(description || '');
+        const maxParticipantsRaw = String(maxParticipants || '').trim();
+
+        if (!normalizedTitle || normalizedTitle.length < 5 || normalizedTitle.length > 120) {
+            return res.status(400).json({ success: false, message: 'Session title must be between 5 and 120 characters' });
+        }
+
+        if (!normalizedModule || normalizedModule.length > 20 || !MODULE_CODE_PATTERN.test(normalizedModule)) {
+            return res.status(400).json({ success: false, message: 'Module code must look like PHY101 or CS2040' });
+        }
+
+        if (!normalizedDescription || normalizedDescription.length < 10 || normalizedDescription.length > 1000) {
+            return res.status(400).json({ success: false, message: 'Description must be between 10 and 1000 characters' });
+        }
+
+        if (!normalizedLocation) {
+            return res.status(400).json({ success: false, message: 'Kuppi link is required' });
+        }
+        if (normalizedLocation.length > 160) {
+            return res.status(400).json({ success: false, message: 'Kuppi link cannot exceed 160 characters' });
+        }
+        if (!isValidHttpUrl(normalizedLocation)) {
+            return res.status(400).json({ success: false, message: 'Kuppi link must be a valid http/https URL' });
+        }
+
+        const sessionDate = new Date(date);
+        if (Number.isNaN(sessionDate.getTime()) || sessionDate <= new Date()) {
+            return res.status(400).json({ success: false, message: 'Date and time must be in the future' });
+        }
+
+        let parsedMaxParticipants;
+        if (maxParticipantsRaw) {
+            if (!/^\d+$/.test(maxParticipantsRaw)) {
+                return res.status(400).json({ success: false, message: 'Max participants must be a whole number' });
+            }
+            parsedMaxParticipants = Number(maxParticipantsRaw);
+            if (parsedMaxParticipants < 2 || parsedMaxParticipants > 500) {
+                return res.status(400).json({ success: false, message: 'Max participants must be between 2 and 500' });
+            }
+        }
+
+        post.title = normalizedTitle;
+        post.module = normalizedModule;
+        post.date = sessionDate;
+        post.location = normalizedLocation;
+        post.description = normalizedDescription;
+        post.maxParticipants = parsedMaxParticipants;
+        await post.save();
+
+        const updated = await Kuppi.findById(post._id)
+            .populate('student', 'name avatarUrl')
+            .populate('participants', 'name avatarUrl')
+            .populate('comments.user', 'name avatarUrl');
+
+        res.json({ success: true, data: serializePost(updated, req.user.id) });
+    } catch (err) {
+        const validationMessage = formatValidationError(err);
+        if (validationMessage) {
+            return res.status(400).json({ success: false, message: validationMessage });
+        }
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// DELETE /api/kuppi/posts/:id
+router.delete('/posts/:id', async (req, res) => {
+    try {
+        const post = await Kuppi.findById(req.params.id);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+        const isOwner = post.student.toString() === req.user.id;
+        if (!isOwner && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this post' });
+        }
+
+        await Kuppi.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Kuppi session deleted' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

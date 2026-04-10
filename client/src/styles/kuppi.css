@@ -82,6 +82,14 @@
   gap: 20px;
 }
 
+.create-post-card .field-error {
+  display: block;
+  margin-top: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* Posts Grid */
 .posts-grid {
   display: grid;
@@ -268,6 +276,30 @@
 
 .btn-download:hover {
   background: #059669;
+}
+
+.owner-action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-owner-delete {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.btn-owner-delete:hover {
+  background: #fecaca;
+}
+
+.owner-edit-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
 }
 
 /* Comments Section */

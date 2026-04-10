@@ -8,6 +8,17 @@ import '../../styles/studentHome.css';
 
 const API_BASE = 'http://localhost:5000/api';
 
+const normalizeSpace = (value = '') => value.trim().replace(/\s+/g, ' ');
+
+const isValidHttpUrl = (value = '') => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch (err) {
+    return false;
+  }
+};
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('ub_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -176,6 +187,7 @@ function ProfileSnapshot({ user, navigate, profileCompletion }) {
       </div>
 
       <div className="snapshot-quick-actions">
+        <button type="button" onClick={() => navigate('/profile')}>Account Settings</button>
         <button type="button" onClick={() => navigate('/student/profile/professional')}>Professional Profile</button>
         <button type="button" onClick={() => navigate('/student/job-portal/applications')}>My Applications</button>
       </div>
@@ -299,6 +311,155 @@ const StudentHome = () => {
     savedJobs: 0,
     recentActivity: [],
   });
+  const [myKuppis, setMyKuppis] = useState([]);
+  const [myKuppiLoading, setMyKuppiLoading] = useState(true);
+  const [myKuppiError, setMyKuppiError] = useState('');
+  const [editingKuppiId, setEditingKuppiId] = useState('');
+  const [kuppiSaving, setKuppiSaving] = useState(false);
+  const [kuppiForm, setKuppiForm] = useState({
+    title: '',
+    module: '',
+    date: '',
+    time: '',
+    location: '',
+    description: '',
+    maxParticipants: ''
+  });
+
+  const fetchMyKuppis = async () => {
+    try {
+      setMyKuppiLoading(true);
+      const headers = getAuthHeaders();
+      const res = await axios.get(`${API_BASE}/kuppi/posts/mine`, { headers });
+      setMyKuppis(res.data?.data || []);
+      setMyKuppiError('');
+    } catch (err) {
+      setMyKuppiError(err.response?.data?.message || 'Failed to load your Kuppi sessions');
+    } finally {
+      setMyKuppiLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role !== 'student') return;
+    fetchMyKuppis();
+  }, [user?.id, user?.role]);
+
+  const startEditKuppi = (kuppi) => {
+    const dateObj = new Date(kuppi.date);
+    const datePart = Number.isNaN(dateObj.getTime()) ? '' : dateObj.toISOString().split('T')[0];
+    const timePart = Number.isNaN(dateObj.getTime())
+      ? ''
+      : dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    setEditingKuppiId(kuppi._id);
+    setKuppiForm({
+      title: kuppi.title || '',
+      module: kuppi.module || '',
+      date: datePart,
+      time: timePart,
+      location: kuppi.location || '',
+      description: kuppi.description || '',
+      maxParticipants: kuppi.maxParticipants ? String(kuppi.maxParticipants) : ''
+    });
+    setMyKuppiError('');
+  };
+
+  const cancelEditKuppi = () => {
+    setEditingKuppiId('');
+    setKuppiForm({
+      title: '',
+      module: '',
+      date: '',
+      time: '',
+      location: '',
+      description: '',
+      maxParticipants: ''
+    });
+    setMyKuppiError('');
+  };
+
+  const saveKuppiUpdate = async (e) => {
+    e.preventDefault();
+    setMyKuppiError('');
+
+    const title = normalizeSpace(kuppiForm.title);
+    const moduleCode = kuppiForm.module.trim().toUpperCase();
+    const location = normalizeSpace(kuppiForm.location);
+    const description = normalizeSpace(kuppiForm.description);
+    const maxRaw = String(kuppiForm.maxParticipants || '').trim();
+
+    if (title.length < 5 || title.length > 120) {
+      setMyKuppiError('Session title must be between 5 and 120 characters.');
+      return;
+    }
+
+    if (!/^[A-Z]{2,6}\d{2,4}[A-Z]?$/.test(moduleCode)) {
+      setMyKuppiError('Module code must look like PHY101 or CS2040.');
+      return;
+    }
+
+    if (!location || !isValidHttpUrl(location)) {
+      setMyKuppiError('Kuppi link must be a valid http/https URL.');
+      return;
+    }
+
+    if (description.length < 10 || description.length > 1000) {
+      setMyKuppiError('Description must be between 10 and 1000 characters.');
+      return;
+    }
+
+    if (!kuppiForm.date || !kuppiForm.time) {
+      setMyKuppiError('Date and time are required.');
+      return;
+    }
+
+    const dateIso = `${kuppiForm.date}T${kuppiForm.time}:00`;
+    if (Number.isNaN(new Date(dateIso).getTime()) || new Date(dateIso) <= new Date()) {
+      setMyKuppiError('Date and time must be in the future.');
+      return;
+    }
+
+    if (maxRaw && (!/^\d+$/.test(maxRaw) || Number(maxRaw) < 2 || Number(maxRaw) > 500)) {
+      setMyKuppiError('Max participants must be between 2 and 500.');
+      return;
+    }
+
+    try {
+      setKuppiSaving(true);
+      const headers = getAuthHeaders();
+      await axios.put(`${API_BASE}/kuppi/posts/${editingKuppiId}`, {
+        title,
+        module: moduleCode,
+        date: dateIso,
+        location,
+        description,
+        maxParticipants: maxRaw
+      }, { headers });
+      cancelEditKuppi();
+      fetchMyKuppis();
+    } catch (err) {
+      setMyKuppiError(err.response?.data?.message || 'Failed to update Kuppi session');
+    } finally {
+      setKuppiSaving(false);
+    }
+  };
+
+  const deleteKuppi = async (kuppiId) => {
+    const confirmed = window.confirm('Delete this Kuppi session?');
+    if (!confirmed) return;
+
+    try {
+      const headers = getAuthHeaders();
+      await axios.delete(`${API_BASE}/kuppi/posts/${kuppiId}`, { headers });
+      if (editingKuppiId === kuppiId) {
+        cancelEditKuppi();
+      }
+      fetchMyKuppis();
+    } catch (err) {
+      setMyKuppiError(err.response?.data?.message || 'Failed to delete Kuppi session');
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -435,6 +596,97 @@ const StudentHome = () => {
           <StatGrid stats={stats} />
           <FeatureGrid features={features} navigate={navigate} />
           <RecentActivity activities={recentActivity} navigate={navigate} />
+
+          {user?.role === 'student' && (
+            <section className="dashboard-section">
+              <div className="section-title-wrap">
+                <h2>My Kuppi Sessions</h2>
+                <p>Manage sessions you created directly from your dashboard.</p>
+              </div>
+
+              {myKuppiError && <div className="alert alert-error">{myKuppiError}</div>}
+
+              {myKuppiLoading ? (
+                <div className="recent-item">
+                  <div className="recent-icon">⏳</div>
+                  <div className="recent-content">
+                    <h4>Loading your Kuppi sessions...</h4>
+                  </div>
+                </div>
+              ) : myKuppis.length === 0 ? (
+                <div className="recent-item">
+                  <div className="recent-icon">🎓</div>
+                  <div className="recent-content">
+                    <h4>No Kuppi sessions created yet</h4>
+                    <p>Create one from Kuppi Hub and manage it here.</p>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: '14px' }}>
+                  {myKuppis.map((k) => (
+                    <div key={k._id} className="card" style={{ padding: '16px', borderRadius: '14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)' }}>{k.title}</h3>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
+                            {k.module} | {new Date(k.date).toLocaleString()}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button className="btn btn-outline" type="button" onClick={() => startEditKuppi(k)}>Edit</button>
+                          <button className="btn" type="button" onClick={() => deleteKuppi(k._id)} style={{ background: 'var(--danger-light)', color: 'var(--danger)', border: '1px solid var(--danger)' }}>Delete</button>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '6px' }}>
+                        <a href={k.location} target="_blank" rel="noreferrer">{k.location}</a>
+                      </div>
+                      <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '14px' }}>{k.description}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {editingKuppiId && (
+                <form onSubmit={saveKuppiUpdate} className="card" style={{ marginTop: '18px', padding: '18px', borderRadius: '14px' }}>
+                  <h3 style={{ marginTop: 0, color: 'var(--text-main)' }}>Edit Kuppi Session</h3>
+                  <div className="form-group" style={{ marginBottom: '12px' }}>
+                    <label>Session Title</label>
+                    <input value={kuppiForm.title} onChange={(e) => setKuppiForm((prev) => ({ ...prev, title: e.target.value }))} required />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '12px' }}>
+                    <label>Module</label>
+                    <input value={kuppiForm.module} onChange={(e) => setKuppiForm((prev) => ({ ...prev, module: e.target.value }))} required />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group" style={{ marginBottom: '12px' }}>
+                      <label>Date</label>
+                      <input type="date" value={kuppiForm.date} onChange={(e) => setKuppiForm((prev) => ({ ...prev, date: e.target.value }))} required />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: '12px' }}>
+                      <label>Time</label>
+                      <input type="time" value={kuppiForm.time} onChange={(e) => setKuppiForm((prev) => ({ ...prev, time: e.target.value }))} required />
+                    </div>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '12px' }}>
+                    <label>Kuppi Link</label>
+                    <input type="url" value={kuppiForm.location} onChange={(e) => setKuppiForm((prev) => ({ ...prev, location: e.target.value }))} required />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '12px' }}>
+                    <label>Max Participants (Optional)</label>
+                    <input type="number" min={2} max={500} value={kuppiForm.maxParticipants} onChange={(e) => setKuppiForm((prev) => ({ ...prev, maxParticipants: e.target.value }))} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '16px' }}>
+                    <label>Description</label>
+                    <textarea value={kuppiForm.description} onChange={(e) => setKuppiForm((prev) => ({ ...prev, description: e.target.value }))} required />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button className="btn btn-primary" type="submit" disabled={kuppiSaving}>{kuppiSaving ? 'Saving...' : 'Save Kuppi'}</button>
+                    <button className="btn btn-outline" type="button" onClick={cancelEditKuppi}>Cancel</button>
+                  </div>
+                </form>
+              )}
+            </section>
+          )}
         </div>
       </div>
       <Footer />

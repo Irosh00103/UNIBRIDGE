@@ -5,6 +5,24 @@ import '../../styles/kuppi.css';
 
 const API = 'http://localhost:5000/api/kuppi';
 
+const TITLE_MAX_LENGTH = 120;
+const MODULE_MAX_LENGTH = 20;
+const LOCATION_MAX_LENGTH = 160;
+const DESCRIPTION_MAX_LENGTH = 1000;
+
+const modulePattern = /^[A-Za-z]{2,6}\d{2,4}[A-Za-z]?$/;
+
+const normalizeSpace = (value) => value.trim().replace(/\s+/g, ' ');
+
+const isValidHttpUrl = (value) => {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (err) {
+        return false;
+    }
+};
+
 const Kuppi = () => {
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
@@ -13,10 +31,106 @@ const Kuppi = () => {
     const [sortBy, setSortBy] = useState('newest');
     const [showForm, setShowForm] = useState(false);
     const [commentText, setCommentText] = useState({});
+    const [formErrors, setFormErrors] = useState({});
+    const [editingPostId, setEditingPostId] = useState('');
+    const [editSaving, setEditSaving] = useState(false);
+    const [editFormErrors, setEditFormErrors] = useState({});
+    const [editFormData, setEditFormData] = useState({
+        title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
+    });
     const [formData, setFormData] = useState({
         title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
     });
     const today = new Date().toISOString().split('T')[0];
+
+    const validateKuppiForm = (data) => {
+        const errors = {};
+        const title = normalizeSpace(data.title || '');
+        const moduleCode = (data.module || '').trim().toUpperCase();
+        const location = normalizeSpace(data.location || '');
+        const description = normalizeSpace(data.description || '');
+        const maxParticipantsRaw = String(data.maxParticipants || '').trim();
+
+        if (!title) {
+            errors.title = 'Session title is required.';
+        } else if (title.length < 5) {
+            errors.title = 'Session title must be at least 5 characters.';
+        } else if (title.length > TITLE_MAX_LENGTH) {
+            errors.title = `Session title cannot exceed ${TITLE_MAX_LENGTH} characters.`;
+        }
+
+        if (!moduleCode) {
+            errors.module = 'Module code is required.';
+        } else if (!modulePattern.test(moduleCode)) {
+            errors.module = 'Enter a valid module code like PHY101 or CS2040.';
+        } else if (moduleCode.length > MODULE_MAX_LENGTH) {
+            errors.module = `Module code cannot exceed ${MODULE_MAX_LENGTH} characters.`;
+        }
+
+        if (!data.date) {
+            errors.date = 'Date is required.';
+        }
+
+        if (!data.time) {
+            errors.time = 'Time is required.';
+        }
+
+        if (data.date && data.time) {
+            const sessionDateTime = new Date(`${data.date}T${data.time}:00`);
+            if (Number.isNaN(sessionDateTime.getTime()) || sessionDateTime <= new Date()) {
+                errors.date = 'Please select a future date and time for your Kuppi session.';
+            }
+        }
+
+        if (!location) {
+            errors.location = 'Kuppi link is required.';
+        } else if (location.length > LOCATION_MAX_LENGTH) {
+            errors.location = `Kuppi link cannot exceed ${LOCATION_MAX_LENGTH} characters.`;
+        } else if (!isValidHttpUrl(location)) {
+            errors.location = 'Kuppi link must be a valid http/https URL.';
+        }
+
+        if (maxParticipantsRaw) {
+            if (!/^\d+$/.test(maxParticipantsRaw)) {
+                errors.maxParticipants = 'Max participants must be a whole number.';
+            } else {
+                const maxParticipants = Number(maxParticipantsRaw);
+                if (maxParticipants < 2 || maxParticipants > 500) {
+                    errors.maxParticipants = 'Max participants must be between 2 and 500.';
+                }
+            }
+        }
+
+        if (!description) {
+            errors.description = 'Description is required.';
+        } else if (description.length < 10) {
+            errors.description = 'Description must be at least 10 characters.';
+        } else if (description.length > DESCRIPTION_MAX_LENGTH) {
+            errors.description = `Description cannot exceed ${DESCRIPTION_MAX_LENGTH} characters.`;
+        }
+
+        return errors;
+    };
+
+    const handleFormChange = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormErrors((prev) => {
+            if (!prev[field]) return prev;
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    };
+
+    const handleEditFormChange = (field, value) => {
+        setEditFormData((prev) => ({ ...prev, [field]: value }));
+        setEditFormErrors((prev) => {
+            if (!prev[field]) return prev;
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    };
 
     const fetchPosts = async () => {
         try {
@@ -37,14 +151,27 @@ const Kuppi = () => {
     const createPost = async (e) => {
         e.preventDefault();
         setError('');
-        const sessionDateTime = new Date(`${formData.date}T${formData.time || '12:00'}:00`);
-        if (Number.isNaN(sessionDateTime.getTime()) || sessionDateTime <= new Date()) {
-            setError('Please select a future date and time for your Kuppi session.');
+        const validationErrors = validateKuppiForm(formData);
+        setFormErrors(validationErrors);
+        if (Object.keys(validationErrors).length > 0) {
+            setError('Please correct the highlighted fields and try again.');
             return;
         }
+
+        const payload = {
+            title: normalizeSpace(formData.title),
+            module: formData.module.trim().toUpperCase(),
+            date: `${formData.date}T${formData.time}:00`,
+            time: formData.time,
+            location: normalizeSpace(formData.location),
+            description: normalizeSpace(formData.description),
+            maxParticipants: String(formData.maxParticipants).trim(),
+        };
+
         try {
-            await axios.post(`${API}/posts`, { ...formData, date: `${formData.date}T${formData.time || '12:00'}:00` });
+            await axios.post(`${API}/posts`, payload);
             setFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
+            setFormErrors({});
             setShowForm(false);
             fetchPosts();
         } catch (err) {
@@ -58,6 +185,78 @@ const Kuppi = () => {
             fetchPosts();
         } catch (err) {
             setError(err.response?.data?.message || 'Action failed');
+        }
+    };
+
+    const startEditingPost = (post) => {
+        const dateObj = new Date(post.date);
+        const dateValue = Number.isNaN(dateObj.getTime()) ? '' : dateObj.toISOString().split('T')[0];
+        const timeValue = Number.isNaN(dateObj.getTime())
+            ? ''
+            : dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        setEditingPostId(post._id);
+        setEditFormErrors({});
+        setEditFormData({
+            title: post.title || '',
+            module: post.module || '',
+            date: dateValue,
+            time: timeValue,
+            location: post.location || '',
+            description: post.description || '',
+            maxParticipants: post.maxParticipants ? String(post.maxParticipants) : ''
+        });
+    };
+
+    const cancelEditingPost = () => {
+        setEditingPostId('');
+        setEditFormErrors({});
+        setEditFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
+    };
+
+    const updatePost = async (postId) => {
+        setError('');
+        const validationErrors = validateKuppiForm(editFormData);
+        setEditFormErrors(validationErrors);
+        if (Object.keys(validationErrors).length > 0) {
+            setError('Please correct the highlighted fields in the edit form.');
+            return;
+        }
+
+        const payload = {
+            title: normalizeSpace(editFormData.title),
+            module: editFormData.module.trim().toUpperCase(),
+            date: `${editFormData.date}T${editFormData.time}:00`,
+            time: editFormData.time,
+            location: normalizeSpace(editFormData.location),
+            description: normalizeSpace(editFormData.description),
+            maxParticipants: String(editFormData.maxParticipants).trim(),
+        };
+
+        try {
+            setEditSaving(true);
+            await axios.put(`${API}/posts/${postId}`, payload);
+            cancelEditingPost();
+            fetchPosts();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to update post');
+        } finally {
+            setEditSaving(false);
+        }
+    };
+
+    const deletePost = async (postId) => {
+        const confirmed = window.confirm('Delete this Kuppi session? This cannot be undone.');
+        if (!confirmed) return;
+
+        try {
+            await axios.delete(`${API}/posts/${postId}`);
+            if (editingPostId === postId) {
+                cancelEditingPost();
+            }
+            fetchPosts();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to delete post');
         }
     };
 
@@ -115,32 +314,39 @@ const Kuppi = () => {
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Session Title</label>
-                                <input required placeholder="e.g. Midterm Physics Review" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                                <input required minLength={5} maxLength={TITLE_MAX_LENGTH} placeholder="e.g. Midterm Physics Review" value={formData.title} onChange={(e) => handleFormChange('title', e.target.value)} />
+                                {formErrors.title && <small className="field-error">{formErrors.title}</small>}
                             </div>
                             <div className="form-group">
                                 <label>Module</label>
-                                <input required placeholder="e.g. PHY101" value={formData.module} onChange={(e) => setFormData({ ...formData, module: e.target.value })} />
+                                <input required maxLength={MODULE_MAX_LENGTH} placeholder="e.g. PHY101" value={formData.module} onChange={(e) => handleFormChange('module', e.target.value)} />
+                                {formErrors.module && <small className="field-error">{formErrors.module}</small>}
                             </div>
                             <div className="form-group">
                                 <label>Date</label>
-                                <input required min={today} type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+                                <input required min={today} type="date" value={formData.date} onChange={(e) => handleFormChange('date', e.target.value)} />
+                                {formErrors.date && <small className="field-error">{formErrors.date}</small>}
                             </div>
                             <div className="form-group">
                                 <label>Time</label>
-                                <input required type="time" value={formData.time} onChange={(e) => setFormData({ ...formData, time: e.target.value })} />
+                                <input required type="time" value={formData.time} onChange={(e) => handleFormChange('time', e.target.value)} />
+                                {formErrors.time && <small className="field-error">{formErrors.time}</small>}
                             </div>
                             <div className="form-group">
-                                <label>Location / Link</label>
-                                <input placeholder="Zoom link or Room C302" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
+                                <label>Kuppi Link</label>
+                                <input required type="url" maxLength={LOCATION_MAX_LENGTH} placeholder="https://zoom.us/j/123456789" value={formData.location} onChange={(e) => handleFormChange('location', e.target.value)} />
+                                {formErrors.location && <small className="field-error">{formErrors.location}</small>}
                             </div>
                             <div className="form-group">
                                 <label>Max Participants (Optional)</label>
-                                <input type="number" placeholder="e.g. 10" value={formData.maxParticipants} onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })} />
+                                <input type="number" min={2} max={500} step={1} placeholder="e.g. 10" value={formData.maxParticipants} onChange={(e) => handleFormChange('maxParticipants', e.target.value)} />
+                                {formErrors.maxParticipants && <small className="field-error">{formErrors.maxParticipants}</small>}
                             </div>
                         </div>
                         <div className="form-group" style={{ marginTop: '16px' }}>
                             <label>Description</label>
-                            <textarea required placeholder="What topics will be covered?" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                            <textarea required minLength={10} maxLength={DESCRIPTION_MAX_LENGTH} placeholder="What topics will be covered?" value={formData.description} onChange={(e) => handleFormChange('description', e.target.value)} />
+                            {formErrors.description && <small className="field-error">{formErrors.description}</small>}
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
                             <button className="btn btn-primary" type="submit" style={{ padding: '12px 32px' }}>Publish Kuppi</button>
@@ -202,7 +408,9 @@ const Kuppi = () => {
                                     </div>
                                     <div className="detail-row">
                                         <span className="detail-icon">📍</span>
-                                        {post.location || 'TBA'}
+                                        {post.location ? (
+                                            <a href={post.location} target="_blank" rel="noreferrer">Join Link</a>
+                                        ) : 'TBA'}
                                     </div>
                                     <div className="detail-row">
                                         <span className="detail-icon">👥</span>
@@ -244,6 +452,62 @@ const Kuppi = () => {
                                         </button>
                                     )}
                                 </div>
+
+                                {isOwner && (
+                                    <div className="owner-action-row">
+                                        <button className="btn btn-outline" onClick={() => startEditingPost(post)} type="button">Edit</button>
+                                        <button className="btn btn-owner-delete" onClick={() => deletePost(post._id)} type="button">Delete</button>
+                                    </div>
+                                )}
+
+                                {isOwner && editingPostId === post._id && (
+                                    <div className="owner-edit-panel">
+                                        <h4 style={{ marginBottom: '12px', color: 'var(--text-main)' }}>Edit Your Kuppi</h4>
+                                        <div className="form-grid">
+                                            <div className="form-group">
+                                                <label>Session Title</label>
+                                                <input value={editFormData.title} onChange={(e) => handleEditFormChange('title', e.target.value)} />
+                                                {editFormErrors.title && <small className="field-error">{editFormErrors.title}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Module</label>
+                                                <input value={editFormData.module} onChange={(e) => handleEditFormChange('module', e.target.value)} />
+                                                {editFormErrors.module && <small className="field-error">{editFormErrors.module}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Date</label>
+                                                <input type="date" min={today} value={editFormData.date} onChange={(e) => handleEditFormChange('date', e.target.value)} />
+                                                {editFormErrors.date && <small className="field-error">{editFormErrors.date}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Time</label>
+                                                <input type="time" value={editFormData.time} onChange={(e) => handleEditFormChange('time', e.target.value)} />
+                                                {editFormErrors.time && <small className="field-error">{editFormErrors.time}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Kuppi Link</label>
+                                                <input type="url" value={editFormData.location} onChange={(e) => handleEditFormChange('location', e.target.value)} />
+                                                {editFormErrors.location && <small className="field-error">{editFormErrors.location}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Max Participants (Optional)</label>
+                                                <input type="number" min={2} max={500} step={1} value={editFormData.maxParticipants} onChange={(e) => handleEditFormChange('maxParticipants', e.target.value)} />
+                                                {editFormErrors.maxParticipants && <small className="field-error">{editFormErrors.maxParticipants}</small>}
+                                            </div>
+                                        </div>
+                                        <div className="form-group" style={{ marginTop: '10px' }}>
+                                            <label>Description</label>
+                                            <textarea value={editFormData.description} onChange={(e) => handleEditFormChange('description', e.target.value)} />
+                                            {editFormErrors.description && <small className="field-error">{editFormErrors.description}</small>}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '14px' }}>
+                                            <button className="btn btn-outline" onClick={cancelEditingPost} type="button">Cancel</button>
+                                            <button className="btn btn-primary" onClick={() => updatePost(post._id)} type="button" disabled={editSaving}>
+                                                {editSaving ? 'Saving...' : 'Save Changes'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 
                                 <hr style={{ marginTop: '24px', marginBottom: '16px', border: 'none', borderTop: '1px solid var(--border-light)' }} />
                                 

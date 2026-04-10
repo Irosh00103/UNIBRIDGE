@@ -14,9 +14,12 @@ const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState([]);
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const notificationRef = useRef(null);
     const profileRef = useRef(null);
+
+    const getDismissedStorageKey = () => `ub_dropdown_notifications_cleared_${user?.id || user?._id || 'guest'}`;
 
     // Handle scroll effect for navbar background
     useEffect(() => {
@@ -37,6 +40,21 @@ const Navbar = () => {
     }, [location]);
 
     useEffect(() => {
+        if (!user) {
+            setDismissedNotificationIds([]);
+            return;
+        }
+
+        try {
+            const saved = localStorage.getItem(getDismissedStorageKey());
+            const parsed = saved ? JSON.parse(saved) : [];
+            setDismissedNotificationIds(Array.isArray(parsed) ? parsed : []);
+        } catch (err) {
+            setDismissedNotificationIds([]);
+        }
+    }, [user?.id, user?._id]);
+
+    useEffect(() => {
         const fetchNotifications = async () => {
             if (!user) return;
             try {
@@ -44,12 +62,10 @@ const Navbar = () => {
                 const res = await axios.get('http://localhost:5000/api/notifications');
                 if (res.data.success) {
                     setNotifications(res.data.data || []);
-                    setUnreadCount(res.data.unreadCount || 0);
                 } else {
                     // Fallback or handle legacy array format if exists
                     const list = Array.isArray(res.data) ? res.data : [];
                     setNotifications(list);
-                    setUnreadCount(list.filter(n => !n.isRead).length);
                 }
             } catch (err) {
                 console.error("Error fetching notifications:", err);
@@ -58,10 +74,8 @@ const Navbar = () => {
                     const resLegacy = await axios.get('http://localhost:5000/api/uni/notifications');
                     const list = Array.isArray(resLegacy.data) ? resLegacy.data : [];
                     setNotifications(list);
-                    setUnreadCount(list.filter(n => !n.isRead).length);
                 } catch (legacyErr) {
                     setNotifications([]);
-                    setUnreadCount(0);
                 }
             }
         };
@@ -71,6 +85,12 @@ const Navbar = () => {
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
     }, [user, location.pathname]);
+
+    const dropdownNotifications = notifications.filter((n) => !dismissedNotificationIds.includes(n._id));
+
+    useEffect(() => {
+        setUnreadCount(dropdownNotifications.filter((n) => !n.isRead).length);
+    }, [notifications, dismissedNotificationIds]);
 
     // Close notifications panel and profile dropdown on click outside
     useEffect(() => {
@@ -106,6 +126,18 @@ const Navbar = () => {
         }
     };
 
+    const clearDropdownNotifications = (e) => {
+        if (e) e.stopPropagation();
+        const idsToDismiss = dropdownNotifications.map((n) => n._id);
+        const merged = Array.from(new Set([...dismissedNotificationIds, ...idsToDismiss]));
+        setDismissedNotificationIds(merged);
+        try {
+            localStorage.setItem(getDismissedStorageKey(), JSON.stringify(merged));
+        } catch (err) {
+            // Ignore localStorage errors in private/restricted contexts
+        }
+    };
+
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
     };
@@ -118,6 +150,8 @@ const Navbar = () => {
         setShowNotifications(false);
         if (user?.role === 'admin') {
             navigate('/admin/notifications');
+        } else if (user?.role === 'employer') {
+            navigate('/employer/notifications');
         } else {
             navigate('/student/notifications');
         }
@@ -173,6 +207,11 @@ const Navbar = () => {
                                             <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
                                                 <div className="notification-header">
                                                     <h3>Notifications</h3>
+                                                    {dropdownNotifications.length > 0 && (
+                                                        <button className="mark-all-read" onClick={clearDropdownNotifications}>
+                                                            Clear dropdown
+                                                        </button>
+                                                    )}
                                                     {unreadCount > 0 && (
                                                         <button className="mark-all-read" onClick={markAllAsRead}>
                                                             Mark all as read
@@ -180,10 +219,10 @@ const Navbar = () => {
                                                     )}
                                                 </div>
                                                 <div className="notification-list">
-                                                    {notifications.length === 0 ? (
+                                                    {dropdownNotifications.length === 0 ? (
                                                         <div className="notification-item muted">No notifications yet.</div>
                                                     ) : (
-                                                        notifications.slice(0, 10).map((n) => (
+                                                        dropdownNotifications.slice(0, 10).map((n) => (
                                                             <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
                                                                 <div className="notification-content">
                                                                     <strong>{n.title}</strong>
@@ -210,6 +249,49 @@ const Navbar = () => {
                                     <Link to="/" className="navbar-link">Home</Link>
                                     <Link to="/employer/dashboard" className="navbar-link">Dashboard</Link>
                                     <Link to="/employer/jobs/create" className="navbar-link">Post Job</Link>
+                                    <div className="navbar-notification" onClick={toggleNotifications} role="button" tabIndex={0} title="Notifications" ref={notificationRef}>
+                                        <span className="notification-bell-icon">🔔</span>
+                                        {unreadCount > 0 && <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                        {showNotifications && (
+                                            <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
+                                                <div className="notification-header">
+                                                    <h3>Notifications</h3>
+                                                    {dropdownNotifications.length > 0 && (
+                                                        <button className="mark-all-read" onClick={clearDropdownNotifications}>
+                                                            Clear dropdown
+                                                        </button>
+                                                    )}
+                                                    {unreadCount > 0 && (
+                                                        <button className="mark-all-read" onClick={markAllAsRead}>
+                                                            Mark all as read
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="notification-list">
+                                                    {dropdownNotifications.length === 0 ? (
+                                                        <div className="notification-item muted">No notifications yet.</div>
+                                                    ) : (
+                                                        dropdownNotifications.slice(0, 10).map((n) => (
+                                                            <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
+                                                                <div className="notification-content">
+                                                                    <strong>{n.title}</strong>
+                                                                    <div className="notification-msg">{n.message}</div>
+                                                                    <div className="notification-time">
+                                                                        {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                                <div className="notification-footer">
+                                                    <button className="notification-view-btn" onClick={handleViewAllNotifications}>
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             ) : (
                                 <>
@@ -223,6 +305,11 @@ const Navbar = () => {
                                             <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
                                                 <div className="notification-header">
                                                     <h3>Notifications</h3>
+                                                    {dropdownNotifications.length > 0 && (
+                                                        <button className="mark-all-read" onClick={clearDropdownNotifications}>
+                                                            Clear dropdown
+                                                        </button>
+                                                    )}
                                                     {unreadCount > 0 && (
                                                         <button className="mark-all-read" onClick={markAllAsRead}>
                                                             Mark all as read
@@ -230,10 +317,10 @@ const Navbar = () => {
                                                     )}
                                                 </div>
                                                 <div className="notification-list">
-                                                    {notifications.length === 0 ? (
+                                                    {dropdownNotifications.length === 0 ? (
                                                         <div className="notification-item muted">No notifications yet.</div>
                                                     ) : (
-                                                        notifications.slice(0, 10).map((n) => (
+                                                        dropdownNotifications.slice(0, 10).map((n) => (
                                                             <div key={n._id} className={`notification-item ${n.isRead ? '' : 'unread'}`}>
                                                                 <div className="notification-content">
                                                                     <strong>{n.title}</strong>
