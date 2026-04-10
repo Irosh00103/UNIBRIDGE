@@ -9,6 +9,8 @@ const TITLE_MAX_LENGTH = 120;
 const MODULE_MAX_LENGTH = 20;
 const LOCATION_MAX_LENGTH = 160;
 const DESCRIPTION_MAX_LENGTH = 1000;
+const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4'];
+const SEMESTER_OPTIONS = ['Semester 1', 'Semester 2'];
 
 const modulePattern = /^[A-Za-z]{2,6}\d{2,4}[A-Za-z]?$/;
 
@@ -36,10 +38,10 @@ const Kuppi = () => {
     const [editSaving, setEditSaving] = useState(false);
     const [editFormErrors, setEditFormErrors] = useState({});
     const [editFormData, setEditFormData] = useState({
-        title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
+        title: '', module: '', year: '', semester: '', date: '', time: '', location: '', description: '', maxParticipants: ''
     });
     const [formData, setFormData] = useState({
-        title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: ''
+        title: '', module: '', year: '', semester: '', date: '', time: '', location: '', description: '', maxParticipants: ''
     });
     const today = new Date().toISOString().split('T')[0];
 
@@ -65,6 +67,14 @@ const Kuppi = () => {
             errors.module = 'Enter a valid module code like PHY101 or CS2040.';
         } else if (moduleCode.length > MODULE_MAX_LENGTH) {
             errors.module = `Module code cannot exceed ${MODULE_MAX_LENGTH} characters.`;
+        }
+
+        if (!YEAR_OPTIONS.includes(data.year)) {
+            errors.year = 'Please select your academic year.';
+        }
+
+        if (!SEMESTER_OPTIONS.includes(data.semester)) {
+            errors.semester = 'Please select your semester.';
         }
 
         if (!data.date) {
@@ -161,6 +171,8 @@ const Kuppi = () => {
         const payload = {
             title: normalizeSpace(formData.title),
             module: formData.module.trim().toUpperCase(),
+            year: formData.year,
+            semester: formData.semester,
             date: `${formData.date}T${formData.time}:00`,
             time: formData.time,
             location: normalizeSpace(formData.location),
@@ -170,7 +182,7 @@ const Kuppi = () => {
 
         try {
             await axios.post(`${API}/posts`, payload);
-            setFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
+            setFormData({ title: '', module: '', year: '', semester: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
             setFormErrors({});
             setShowForm(false);
             fetchPosts();
@@ -200,6 +212,8 @@ const Kuppi = () => {
         setEditFormData({
             title: post.title || '',
             module: post.module || '',
+            year: post.year || '',
+            semester: post.semester || '',
             date: dateValue,
             time: timeValue,
             location: post.location || '',
@@ -211,7 +225,7 @@ const Kuppi = () => {
     const cancelEditingPost = () => {
         setEditingPostId('');
         setEditFormErrors({});
-        setEditFormData({ title: '', module: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
+        setEditFormData({ title: '', module: '', year: '', semester: '', date: '', time: '', location: '', description: '', maxParticipants: '' });
     };
 
     const updatePost = async (postId) => {
@@ -226,6 +240,8 @@ const Kuppi = () => {
         const payload = {
             title: normalizeSpace(editFormData.title),
             module: editFormData.module.trim().toUpperCase(),
+            year: editFormData.year,
+            semester: editFormData.semester,
             date: `${editFormData.date}T${editFormData.time}:00`,
             time: editFormData.time,
             location: normalizeSpace(editFormData.location),
@@ -323,6 +339,26 @@ const Kuppi = () => {
                                 {formErrors.module && <small className="field-error">{formErrors.module}</small>}
                             </div>
                             <div className="form-group">
+                                <label>Year</label>
+                                <select required value={formData.year} onChange={(e) => handleFormChange('year', e.target.value)}>
+                                    <option value="">Select year</option>
+                                    {YEAR_OPTIONS.map((year) => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
+                                </select>
+                                {formErrors.year && <small className="field-error">{formErrors.year}</small>}
+                            </div>
+                            <div className="form-group">
+                                <label>Semester</label>
+                                <select required value={formData.semester} onChange={(e) => handleFormChange('semester', e.target.value)}>
+                                    <option value="">Select semester</option>
+                                    {SEMESTER_OPTIONS.map((semester) => (
+                                        <option key={semester} value={semester}>{semester}</option>
+                                    ))}
+                                </select>
+                                {formErrors.semester && <small className="field-error">{formErrors.semester}</small>}
+                            </div>
+                            <div className="form-group">
                                 <label>Date</label>
                                 <input required min={today} type="date" value={formData.date} onChange={(e) => handleFormChange('date', e.target.value)} />
                                 {formErrors.date && <small className="field-error">{formErrors.date}</small>}
@@ -394,6 +430,8 @@ const Kuppi = () => {
                                 
                                 <div className="post-tags">
                                     <span className="badge badge-type">{post.module}</span>
+                                    {post.year && <span className="badge badge-type">{post.year}</span>}
+                                    {post.semester && <span className="badge badge-type">{post.semester}</span>}
                                     {post.maxParticipants && (
                                         <span className="badge badge-type">Max: {post.maxParticipants}</span>
                                     )}
@@ -473,6 +511,26 @@ const Kuppi = () => {
                                                 <label>Module</label>
                                                 <input value={editFormData.module} onChange={(e) => handleEditFormChange('module', e.target.value)} />
                                                 {editFormErrors.module && <small className="field-error">{editFormErrors.module}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Year</label>
+                                                <select value={editFormData.year} onChange={(e) => handleEditFormChange('year', e.target.value)}>
+                                                    <option value="">Select year</option>
+                                                    {YEAR_OPTIONS.map((year) => (
+                                                        <option key={year} value={year}>{year}</option>
+                                                    ))}
+                                                </select>
+                                                {editFormErrors.year && <small className="field-error">{editFormErrors.year}</small>}
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Semester</label>
+                                                <select value={editFormData.semester} onChange={(e) => handleEditFormChange('semester', e.target.value)}>
+                                                    <option value="">Select semester</option>
+                                                    {SEMESTER_OPTIONS.map((semester) => (
+                                                        <option key={semester} value={semester}>{semester}</option>
+                                                    ))}
+                                                </select>
+                                                {editFormErrors.semester && <small className="field-error">{editFormErrors.semester}</small>}
                                             </div>
                                             <div className="form-group">
                                                 <label>Date</label>

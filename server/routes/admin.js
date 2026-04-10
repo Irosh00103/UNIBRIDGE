@@ -150,8 +150,12 @@ router.get('/kuppis', async (req, res) => {
 
 router.put('/kuppis/:id', async (req, res) => {
     try {
-        const { title, module, date, location, maxParticipants } = req.body;
-        const kuppi = await Kuppi.findByIdAndUpdate(req.params.id, { title, module, date, location, maxParticipants }, { new: true, runValidators: true });
+        const { title, module, year, semester, date, location, maxParticipants } = req.body;
+        const kuppi = await Kuppi.findByIdAndUpdate(
+            req.params.id,
+            { title, module, year, semester, date, location, maxParticipants },
+            { new: true, runValidators: true }
+        );
         res.json({ success: true, data: kuppi });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

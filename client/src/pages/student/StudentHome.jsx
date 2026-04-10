@@ -7,6 +7,8 @@ import Footer from '../../components/Footer';
 import '../../styles/studentHome.css';
 
 const API_BASE = 'http://localhost:5000/api';
+const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4'];
+const SEMESTER_OPTIONS = ['Semester 1', 'Semester 2'];
 
 const normalizeSpace = (value = '') => value.trim().replace(/\s+/g, ' ');
 
@@ -319,6 +321,8 @@ const StudentHome = () => {
   const [kuppiForm, setKuppiForm] = useState({
     title: '',
     module: '',
+    year: '',
+    semester: '',
     date: '',
     time: '',
     location: '',
@@ -356,6 +360,8 @@ const StudentHome = () => {
     setKuppiForm({
       title: kuppi.title || '',
       module: kuppi.module || '',
+      year: kuppi.year || '',
+      semester: kuppi.semester || '',
       date: datePart,
       time: timePart,
       location: kuppi.location || '',
@@ -370,6 +376,8 @@ const StudentHome = () => {
     setKuppiForm({
       title: '',
       module: '',
+      year: '',
+      semester: '',
       date: '',
       time: '',
       location: '',
@@ -385,6 +393,8 @@ const StudentHome = () => {
 
     const title = normalizeSpace(kuppiForm.title);
     const moduleCode = kuppiForm.module.trim().toUpperCase();
+    const year = kuppiForm.year;
+    const semester = kuppiForm.semester;
     const location = normalizeSpace(kuppiForm.location);
     const description = normalizeSpace(kuppiForm.description);
     const maxRaw = String(kuppiForm.maxParticipants || '').trim();
@@ -396,6 +406,16 @@ const StudentHome = () => {
 
     if (!/^[A-Z]{2,6}\d{2,4}[A-Z]?$/.test(moduleCode)) {
       setMyKuppiError('Module code must look like PHY101 or CS2040.');
+      return;
+    }
+
+    if (!YEAR_OPTIONS.includes(year)) {
+      setMyKuppiError('Please select a valid academic year.');
+      return;
+    }
+
+    if (!SEMESTER_OPTIONS.includes(semester)) {
+      setMyKuppiError('Please select a valid semester.');
       return;
     }
 
@@ -431,6 +451,8 @@ const StudentHome = () => {
       await axios.put(`${API_BASE}/kuppi/posts/${editingKuppiId}`, {
         title,
         module: moduleCode,
+        year,
+        semester,
         date: dateIso,
         location,
         description,
@@ -629,7 +651,11 @@ const StudentHome = () => {
                         <div>
                           <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)' }}>{k.title}</h3>
                           <div style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
-                            {k.module} | {new Date(k.date).toLocaleString()}
+                            {k.module}
+                            {k.year ? ` | ${k.year}` : ''}
+                            {k.semester ? ` | ${k.semester}` : ''}
+                            {' | '}
+                            {new Date(k.date).toLocaleString()}
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
@@ -656,6 +682,26 @@ const StudentHome = () => {
                   <div className="form-group" style={{ marginBottom: '12px' }}>
                     <label>Module</label>
                     <input value={kuppiForm.module} onChange={(e) => setKuppiForm((prev) => ({ ...prev, module: e.target.value }))} required />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group" style={{ marginBottom: '12px' }}>
+                      <label>Year</label>
+                      <select value={kuppiForm.year} onChange={(e) => setKuppiForm((prev) => ({ ...prev, year: e.target.value }))} required>
+                        <option value="">Select year</option>
+                        {YEAR_OPTIONS.map((year) => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ marginBottom: '12px' }}>
+                      <label>Semester</label>
+                      <select value={kuppiForm.semester} onChange={(e) => setKuppiForm((prev) => ({ ...prev, semester: e.target.value }))} required>
+                        <option value="">Select semester</option>
+                        {SEMESTER_OPTIONS.map((semester) => (
+                          <option key={semester} value={semester}>{semester}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div className="form-group" style={{ marginBottom: '12px' }}>

@@ -93,6 +93,8 @@ const AdminDashboard = () => {
             setEditForm({ 
                 title: item.title, 
                 module: item.module, 
+                year: item.year || '',
+                semester: item.semester || '',
                 date: item.date ? new Date(item.date).toISOString().slice(0, 16) : '', 
                 location: item.location || '',
                 maxParticipants: item.maxParticipants || ''
@@ -272,6 +274,7 @@ const AdminDashboard = () => {
                                     <tr>
                                         <th>Title</th>
                                         <th>Module</th>
+                                        <th>Year / Semester</th>
                                         <th>Date</th>
                                         <th>Host Email</th>
                                         <th>Actions</th>
@@ -282,6 +285,7 @@ const AdminDashboard = () => {
                                         <tr key={k._id}>
                                             <td style={{ fontWeight: 600 }}>{k.title}</td>
                                             <td style={{ color: 'var(--text-muted)' }}>{k.module}</td>
+                                            <td style={{ color: 'var(--text-muted)' }}>{k.year || '-'} / {k.semester || '-'}</td>
                                             <td>{new Date(k.date).toLocaleString()}</td>
                                             <td>{k.student?.email || 'N/A'}</td>
                                             <td>
@@ -400,6 +404,22 @@ const AdminDashboard = () => {
                                 <>
                                     <div className="form-group"><label>Session Title</label><input required value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} /></div>
                                     <div className="form-group"><label>Module Code</label><input required value={editForm.module} onChange={e => setEditForm({...editForm, module: e.target.value})} /></div>
+                                    <div className="form-group"><label>Year</label>
+                                        <select required value={editForm.year || ''} onChange={e => setEditForm({...editForm, year: e.target.value})}>
+                                            <option value="">Select year</option>
+                                            <option value="Year 1">Year 1</option>
+                                            <option value="Year 2">Year 2</option>
+                                            <option value="Year 3">Year 3</option>
+                                            <option value="Year 4">Year 4</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group"><label>Semester</label>
+                                        <select required value={editForm.semester || ''} onChange={e => setEditForm({...editForm, semester: e.target.value})}>
+                                            <option value="">Select semester</option>
+                                            <option value="Semester 1">Semester 1</option>
+                                            <option value="Semester 2">Semester 2</option>
+                                        </select>
+                                    </div>
                                     <div className="form-group"><label>Date & Time</label><input required type="datetime-local" value={editForm.date} onChange={e => setEditForm({...editForm, date: e.target.value})} /></div>
                                     <div className="form-group"><label>Location/Meeting Link</label><input value={editForm.location} onChange={e => setEditForm({...editForm, location: e.target.value})} /></div>
                                     <div className="form-group"><label>Max Participants Limit (Optional)</label><input type="number" min="1" value={editForm.maxParticipants} onChange={e => setEditForm({...editForm, maxParticipants: e.target.value})} /></div>

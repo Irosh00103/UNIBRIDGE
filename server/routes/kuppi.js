@@ -7,6 +7,8 @@ const { protect } = require('../middleware/auth');
 router.use(protect);
 
 const MODULE_CODE_PATTERN = /^[A-Z]{2,6}\d{2,4}[A-Z]?$/;
+const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4'];
+const SEMESTER_OPTIONS = ['Semester 1', 'Semester 2'];
 
 const normalizeSpace = (value = '') => value.trim().replace(/\s+/g, ' ');
 
@@ -81,7 +83,7 @@ router.post('/posts', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Students only' });
         }
 
-        const { title, module: mod, date, time, location, description, maxParticipants } = req.body;
+        const { title, module: mod, year, semester, date, time, location, description, maxParticipants } = req.body;
 
         const normalizedTitle = normalizeSpace(title || '');
         const normalizedModule = String(mod || '').trim().toUpperCase();
@@ -101,6 +103,16 @@ router.post('/posts', async (req, res) => {
         }
         if (normalizedModule.length > 20 || !MODULE_CODE_PATTERN.test(normalizedModule)) {
             return res.status(400).json({ success: false, message: 'Module code must look like PHY101 or CS2040' });
+        }
+
+        const normalizedYear = normalizeSpace(String(year || ''));
+        if (!YEAR_OPTIONS.includes(normalizedYear)) {
+            return res.status(400).json({ success: false, message: 'Please select a valid academic year' });
+        }
+
+        const normalizedSemester = normalizeSpace(String(semester || ''));
+        if (!SEMESTER_OPTIONS.includes(normalizedSemester)) {
+            return res.status(400).json({ success: false, message: 'Please select a valid semester' });
         }
 
         if (!normalizedDescription) {
@@ -144,6 +156,8 @@ router.post('/posts', async (req, res) => {
             student: req.user.id,
             title: normalizedTitle,
             module: normalizedModule,
+            year: normalizedYear,
+            semester: normalizedSemester,
             date: sessionDate,
             location: normalizedLocation || undefined,
             description: normalizedDescription,
@@ -176,7 +190,7 @@ router.put('/posts/:id', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized to update this post' });
         }
 
-        const { title, module: mod, date, location, description, maxParticipants } = req.body;
+        const { title, module: mod, year, semester, date, location, description, maxParticipants } = req.body;
 
         const normalizedTitle = normalizeSpace(title || '');
         const normalizedModule = String(mod || '').trim().toUpperCase();
@@ -190,6 +204,16 @@ router.put('/posts/:id', async (req, res) => {
 
         if (!normalizedModule || normalizedModule.length > 20 || !MODULE_CODE_PATTERN.test(normalizedModule)) {
             return res.status(400).json({ success: false, message: 'Module code must look like PHY101 or CS2040' });
+        }
+
+        const normalizedYear = normalizeSpace(String(year || ''));
+        if (!YEAR_OPTIONS.includes(normalizedYear)) {
+            return res.status(400).json({ success: false, message: 'Please select a valid academic year' });
+        }
+
+        const normalizedSemester = normalizeSpace(String(semester || ''));
+        if (!SEMESTER_OPTIONS.includes(normalizedSemester)) {
+            return res.status(400).json({ success: false, message: 'Please select a valid semester' });
         }
 
         if (!normalizedDescription || normalizedDescription.length < 10 || normalizedDescription.length > 1000) {
@@ -224,6 +248,8 @@ router.put('/posts/:id', async (req, res) => {
 
         post.title = normalizedTitle;
         post.module = normalizedModule;
+        post.year = normalizedYear;
+        post.semester = normalizedSemester;
         post.date = sessionDate;
         post.location = normalizedLocation;
         post.description = normalizedDescription;

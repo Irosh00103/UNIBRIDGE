@@ -26,6 +26,14 @@ const kuppiSchema = new mongoose.Schema({
         maxlength: 20,
         match: [/^[A-Z]{2,6}\d{2,4}[A-Z]?$/, 'Module code must look like PHY101 or CS2040']
     },
+    year: {
+        type: String,
+        enum: ['Year 1', 'Year 2', 'Year 3', 'Year 4']
+    },
+    semester: {
+        type: String,
+        enum: ['Semester 1', 'Semester 2']
+    },
     date: { type: Date, required: true },
     location: {
         type: String,
