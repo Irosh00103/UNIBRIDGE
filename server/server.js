@@ -20,6 +20,7 @@ const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
 const kuppiRoutes = require('./routes/kuppi');
 const notificationRoutes = require('./routes/notifications');
+const moduleRoutes = require('./routes/modules');
 
 const userRoutes = require('./routes/users');
 
@@ -38,6 +39,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/kuppi', kuppiRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/modules', moduleRoutes);
 
 app.use('/api/users', userRoutes);
 
