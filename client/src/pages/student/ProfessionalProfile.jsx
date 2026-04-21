@@ -1838,9 +1838,17 @@ function SkillsExpertiseModal({
 }) {
   if (!isOpen) return null;
 
+  const hasSelectedSkills = selectedSkills.length > 0;
+  const hasSearchResults = showSuggestions && filteredSuggestions.length > 0;
+  const showCompactLayout = hasSelectedSkills || hasSearchResults;
+
   return (
     <div className="profile-modal-overlay">
-      <div className="profile-modal skills-modal">
+      <div
+        className={`profile-modal skills-modal ${
+          showCompactLayout ? "skills-modal-compact" : "skills-modal-empty"
+        }`}
+      >
         <div className="profile-modal-header">
           <div>
             <h2>Skills & expertise</h2>
@@ -1859,64 +1867,66 @@ function SkillsExpertiseModal({
 
         <div className="profile-modal-body">
           <div className="skills-search-wrap">
-            <label className="profile-form-label">Search skills</label>
+            <label className="profile-form-label">Search for skills</label>
             <input
               type="text"
-              placeholder="e.g. React, Figma, Communication"
+              className="skills-search-input"
+              placeholder="Example: Figma"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
 
-          {showSuggestions ? (
-            <div className="skills-suggestions-wrap">
-              {filteredSuggestions.length > 0 ? (
-                <div className="skills-suggestion-list">
-                  {filteredSuggestions.map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      className="skills-suggestion-item"
-                      onClick={() => onAddSkill(skill)}
-                    >
-                      <FaPlus />
-                      <span>{skill}</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="skills-empty-message">
-                  No matching skills found in the list.
-                </p>
-              )}
-            </div>
-          ) : null}
+          <div className="skills-all-wrap">
+            <h3 className="skills-section-title">ALL SKILLS</h3>
 
-          <div className="skills-selected-wrap">
-            <h3>Selected skills</h3>
-
-            {selectedSkills.length > 0 ? (
-              <div className="skills-selected-list">
-                {selectedSkills.map((skill) => (
-                  <span key={skill} className="skills-selected-chip">
+            {hasSearchResults ? (
+              <div className="skills-compact-list">
+                {filteredSuggestions.map((skill) => (
+                  <div key={skill} className="skills-compact-item">
                     <span>{skill}</span>
                     <button
                       type="button"
-                      className="skills-remove-btn"
+                      className="skills-compact-action"
+                      onClick={() => onAddSkill(skill)}
+                      aria-label={`Add ${skill}`}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : !hasSelectedSkills ? (
+              <div className="skills-empty-illustration">
+                <div className="skills-empty-icon-circle">
+                  <span>{"</>"}</span>
+                </div>
+                <h3>Start building your list of skills</h3>
+                <p>Search and select skills to add them to your list.</p>
+              </div>
+            ) : null}
+          </div>
+
+          {hasSelectedSkills ? (
+            <div className="skills-selected-wrap top-space">
+              <h3 className="skills-section-title">Selected skills</h3>
+              <div className="skills-compact-list">
+                {selectedSkills.map((skill) => (
+                  <div key={skill} className="skills-compact-item">
+                    <span>{skill}</span>
+                    <button
+                      type="button"
+                      className="skills-compact-action remove"
                       onClick={() => onRemoveSkill(skill)}
                       aria-label={`Remove ${skill}`}
                     >
                       <FaTimes />
                     </button>
-                  </span>
+                  </div>
                 ))}
               </div>
-            ) : (
-              <p className="skills-empty-message">
-                Search above and add skills to your list.
-              </p>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="profile-modal-footer">

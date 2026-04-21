@@ -1480,9 +1480,163 @@
   color: var(--pp-text-muted);
 }
 
-/* =========================
-   RESPONSIVE
-   ========================= */
+/* ===== SKILLS MODAL FINAL FIX ===== */
+
+.myspace-page .skills-modal-empty {
+  width: min(1030px, 100%);
+  max-height: calc(100vh - 120px);
+}
+
+.myspace-page .skills-modal-compact {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 120px);
+}
+
+.myspace-page .skills-search-input {
+  width: 100%;
+  height: 54px;
+  border: 1px solid var(--pp-border-strong);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 16px;
+  font-size: 16px;
+  color: var(--pp-text);
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.myspace-page .skills-search-input:focus {
+  border-color: var(--pp-primary);
+  box-shadow: 0 0 0 4px rgba(38, 132, 255, 0.12);
+}
+
+.myspace-page .skills-all-wrap {
+  margin-top: 14px;
+}
+
+.myspace-page .skills-section-title {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pp-text);
+  text-transform: uppercase;
+}
+
+.myspace-page .skills-empty-illustration {
+  min-height: 320px;
+  border-top: 1px solid #edf2f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 20px 10px;
+}
+
+.myspace-page .skills-empty-icon-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: #f4f1ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.myspace-page .skills-empty-icon-circle span {
+  font-size: 48px;
+  font-weight: 800;
+  color: #111;
+  display: inline-block;
+  transform: rotate(-8deg);
+}
+
+.myspace-page .skills-empty-illustration h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #111;
+}
+
+.myspace-page .skills-empty-illustration p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .skills-selected-wrap.top-space {
+  margin-top: 26px;
+}
+
+.myspace-page .skills-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.myspace-page .skills-compact-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf2f8;
+  font-size: 16px;
+  color: var(--pp-text);
+}
+
+.myspace-page .skills-compact-item span {
+  line-height: 1.4;
+}
+
+.myspace-page .skills-compact-action {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #111;
+  font-size: 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.myspace-page .skills-compact-action.remove {
+  color: #111;
+}
+
+@media (max-width: 768px) {
+  .myspace-page .skills-modal-empty,
+  .myspace-page .skills-modal-compact {
+    width: 100%;
+  }
+
+  .myspace-page .skills-empty-illustration {
+    min-height: 240px;
+  }
+
+  .myspace-page .skills-empty-icon-circle {
+    width: 130px;
+    height: 130px;
+  }
+
+  .myspace-page .skills-empty-icon-circle span {
+    font-size: 34px;
+  }
+
+  .myspace-page .skills-empty-illustration h3 {
+    font-size: 22px;
+  }
+
+  .myspace-page .skills-empty-illustration p {
+    font-size: 15px;
+  }
+}
 
 @media (max-width: 1200px) {
   .myspace-page .overview-grid {
