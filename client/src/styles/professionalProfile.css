@@ -1480,162 +1480,362 @@
   color: var(--pp-text-muted);
 }
 
-/* ===== SKILLS MODAL FINAL FIX ===== */
+/* ===== ORIGINAL MYSPACE-STYLE SKILLS MODAL ===== */
 
-.myspace-page .skills-modal-empty {
-  width: min(1030px, 100%);
-  max-height: calc(100vh - 120px);
+.myspace-page .skills-modal {
+  width: min(760px, 100%);
 }
 
-.myspace-page .skills-modal-compact {
-  width: min(760px, 100%);
-  max-height: calc(100vh - 120px);
+.myspace-page .skills-modal-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .myspace-page .skills-search-input {
   width: 100%;
-  height: 54px;
-  border: 1px solid var(--pp-border-strong);
-  border-radius: 10px;
-  background: #fff;
-  padding: 0 16px;
+  height: 48px;
+  border: 1px solid #e6d88c;
+  border-radius: 2px;
+  background: #ffffff;
+  padding: 0 14px;
   font-size: 16px;
-  color: var(--pp-text);
+  color: #111111;
   outline: none;
-  transition: 0.2s ease;
 }
 
-.myspace-page .skills-search-input:focus {
-  border-color: var(--pp-primary);
-  box-shadow: 0 0 0 4px rgba(38, 132, 255, 0.12);
+.myspace-page .skills-search-input::placeholder {
+  color: #a1a1a1;
 }
 
-.myspace-page .skills-all-wrap {
-  margin-top: 14px;
-}
-
-.myspace-page .skills-section-title {
-  margin: 0 0 18px;
-  font-size: 18px;
+.myspace-page .skills-modal-section-title {
+  margin: 6px 0 22px;
+  font-size: 16px;
   font-weight: 800;
-  color: var(--pp-text);
+  color: #111111;
   text-transform: uppercase;
 }
 
-.myspace-page .skills-empty-illustration {
-  min-height: 320px;
-  border-top: 1px solid #edf2f8;
+.myspace-page .skills-empty-state {
+  min-height: 330px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 24px 20px 10px;
+  padding: 20px 20px 0;
 }
 
-.myspace-page .skills-empty-icon-circle {
-  width: 180px;
-  height: 180px;
+.myspace-page .skills-empty-illustration {
+  width: 220px;
+  height: 220px;
   border-radius: 999px;
-  background: #f4f1ed;
+  background: #f3efe8;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
-.myspace-page .skills-empty-icon-circle span {
-  font-size: 48px;
+.myspace-page .skills-empty-illustration-box {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #111111;
+  border-radius: 20px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-6deg);
+}
+
+.myspace-page .skills-empty-illustration-box span {
+  font-size: 42px;
   font-weight: 800;
-  color: #111;
-  display: inline-block;
-  transform: rotate(-8deg);
+  color: #111111;
 }
 
-.myspace-page .skills-empty-illustration h3 {
-  margin: 0 0 10px;
-  font-size: 26px;
+.myspace-page .skills-empty-state h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
   line-height: 1.2;
   font-weight: 800;
-  color: #111;
+  color: #050505;
 }
 
-.myspace-page .skills-empty-illustration p {
+.myspace-page .skills-empty-state p {
   margin: 0;
   font-size: 16px;
   line-height: 1.45;
-  color: var(--pp-text-soft);
+  color: #111111;
 }
 
-.myspace-page .skills-selected-wrap.top-space {
-  margin-top: 26px;
-}
-
-.myspace-page .skills-compact-list {
+.myspace-page .skills-selected-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 18px;
+  padding-bottom: 12px;
 }
 
-.myspace-page .skills-compact-item {
+.myspace-page .skills-selected-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 10px 0;
-  border-bottom: 1px solid #edf2f8;
-  font-size: 16px;
-  color: var(--pp-text);
+  gap: 16px;
+  font-size: 17px;
+  line-height: 1.35;
+  color: #111111;
 }
 
-.myspace-page .skills-compact-item span {
-  line-height: 1.4;
-}
-
-.myspace-page .skills-compact-action {
-  width: 30px;
-  height: 30px;
+.myspace-page .skills-remove-btn {
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
-  color: #111;
+  color: #111111;
   font-size: 18px;
   cursor: pointer;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.myspace-page .skills-suggestions-dropdown {
+  position: absolute;
+  top: 104px;
+  left: 36px;
+  right: 36px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #d9d5cf;
+  border-top: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 8;
+}
+
+.myspace-page .skills-suggestion-item {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #111111;
+  cursor: pointer;
+}
+
+.myspace-page .skills-suggestion-item:hover {
+  background: #f7f5f1;
+}
+
+/* ===== ORIGINAL MYSPACE-STYLE LANGUAGES MODAL ===== */
+
+.myspace-page .languages-modal {
+  width: min(760px, 100%);
+}
+
+.myspace-page .languages-modal-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.myspace-page .languages-search-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #e6d88c;
+  border-radius: 2px;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 16px;
+  color: #111111;
+  outline: none;
+}
+
+.myspace-page .languages-search-input::placeholder {
+  color: #a1a1a1;
+}
+
+.myspace-page .languages-modal-section-title {
+  margin: 6px 0 22px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111111;
+  text-transform: uppercase;
+}
+
+.myspace-page .languages-empty-state {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 20px 0;
+}
+
+.myspace-page .languages-empty-illustration {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: #f3efe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.myspace-page .languages-empty-illustration-bubble {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #111111;
+  border-radius: 28px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.myspace-page .languages-empty-illustration-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 28px;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-left: 2px solid #111111;
+  border-bottom: 2px solid #111111;
+  transform: rotate(-35deg);
+}
+
+.myspace-page .languages-empty-illustration-bubble span {
+  font-size: 34px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.myspace-page .languages-empty-state h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #050505;
+}
+
+.myspace-page .languages-empty-state p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #111111;
+}
+
+.myspace-page .languages-selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 12px;
+}
+
+.myspace-page .languages-selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 17px;
+  line-height: 1.35;
+  color: #111111;
+}
+
+.myspace-page .languages-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #111111;
+  font-size: 18px;
+  cursor: pointer;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.myspace-page .skills-compact-action.remove {
-  color: #111;
+.myspace-page .languages-suggestions-dropdown {
+  position: absolute;
+  top: 104px;
+  left: 36px;
+  right: 36px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #d9d5cf;
+  border-top: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 8;
 }
 
-@media (max-width: 768px) {
-  .myspace-page .skills-modal-empty,
-  .myspace-page .skills-modal-compact {
-    width: 100%;
-  }
+.myspace-page .languages-suggestion-item {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #111111;
+  cursor: pointer;
+}
 
-  .myspace-page .skills-empty-illustration {
-    min-height: 240px;
-  }
+.myspace-page .languages-suggestion-item:hover {
+  background: #f7f5f1;
+}
 
-  .myspace-page .skills-empty-icon-circle {
-    width: 130px;
-    height: 130px;
-  }
+.myspace-page .skills-modal-body,
+.myspace-page .languages-modal-body {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow-y: visible;
+}
 
-  .myspace-page .skills-empty-icon-circle span {
-    font-size: 34px;
-  }
+.myspace-page .skills-empty-state,
+.myspace-page .languages-empty-state {
+  min-height: 240px;
+  padding: 8px 20px 0;
+}
 
-  .myspace-page .skills-empty-illustration h3 {
-    font-size: 22px;
-  }
+.myspace-page .skills-empty-illustration,
+.myspace-page .languages-empty-illustration {
+  width: 180px;
+  height: 180px;
+  margin-bottom: 18px;
+}
 
-  .myspace-page .skills-empty-illustration p {
-    font-size: 15px;
-  }
+.myspace-page .skills-empty-illustration-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 18px;
+}
+
+.myspace-page .languages-empty-illustration-bubble {
+  width: 100px;
+  height: 100px;
+  border-radius: 24px;
+}
+
+.myspace-page .languages-empty-illustration-bubble::after {
+  bottom: -10px;
+  left: 22px;
+  width: 18px;
+  height: 18px;
+}
+
+.myspace-page .skills-empty-state h3,
+.myspace-page .languages-empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
 }
 
 @media (max-width: 1200px) {

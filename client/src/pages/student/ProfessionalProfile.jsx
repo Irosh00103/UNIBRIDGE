@@ -1838,17 +1838,11 @@ function SkillsExpertiseModal({
 }) {
   if (!isOpen) return null;
 
-  const hasSelectedSkills = selectedSkills.length > 0;
-  const hasSearchResults = showSuggestions && filteredSuggestions.length > 0;
-  const showCompactLayout = hasSelectedSkills || hasSearchResults;
+  const hasSkills = selectedSkills.length > 0;
 
   return (
     <div className="profile-modal-overlay">
-      <div
-        className={`profile-modal skills-modal ${
-          showCompactLayout ? "skills-modal-compact" : "skills-modal-empty"
-        }`}
-      >
+      <div className="profile-modal skills-modal">
         <div className="profile-modal-header">
           <div>
             <h2>Skills & expertise</h2>
@@ -1865,66 +1859,61 @@ function SkillsExpertiseModal({
           </button>
         </div>
 
-        <div className="profile-modal-body">
-          <div className="skills-search-wrap">
+        <div className="profile-modal-body skills-modal-body">
+          <div className="profile-form-group full-width">
             <label className="profile-form-label">Search for skills</label>
             <input
               type="text"
-              className="skills-search-input"
               placeholder="Example: Figma"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
+              className="skills-search-input"
             />
           </div>
 
-          <div className="skills-all-wrap">
-            <h3 className="skills-section-title">ALL SKILLS</h3>
+          <div className="skills-modal-section-title">ALL SKILLS</div>
 
-            {hasSearchResults ? (
-              <div className="skills-compact-list">
-                {filteredSuggestions.map((skill) => (
-                  <div key={skill} className="skills-compact-item">
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      className="skills-compact-action"
-                      onClick={() => onAddSkill(skill)}
-                      aria-label={`Add ${skill}`}
-                    >
-                      <FaPlus />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : !hasSelectedSkills ? (
+          {!hasSkills ? (
+            <div className="skills-empty-state">
               <div className="skills-empty-illustration">
-                <div className="skills-empty-icon-circle">
-                  <span>{"</>"}</span>
+                <div className="skills-empty-illustration-box">
+                  <span>{`</>`}</span>
                 </div>
-                <h3>Start building your list of skills</h3>
-                <p>Search and select skills to add them to your list.</p>
               </div>
-            ) : null}
-          </div>
 
-          {hasSelectedSkills ? (
-            <div className="skills-selected-wrap top-space">
-              <h3 className="skills-section-title">Selected skills</h3>
-              <div className="skills-compact-list">
-                {selectedSkills.map((skill) => (
-                  <div key={skill} className="skills-compact-item">
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      className="skills-compact-action remove"
-                      onClick={() => onRemoveSkill(skill)}
-                      aria-label={`Remove ${skill}`}
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <h3>Start building your list of skills</h3>
+              <p>Search and select skills to add them to your list.</p>
+            </div>
+          ) : (
+            <div className="skills-selected-list">
+              {selectedSkills.map((skill) => (
+                <div key={skill} className="skills-selected-item">
+                  <span>{skill}</span>
+                  <button
+                    type="button"
+                    className="skills-remove-btn"
+                    onClick={() => onRemoveSkill(skill)}
+                    aria-label={`Remove ${skill}`}
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showSuggestions && filteredSuggestions.length > 0 ? (
+            <div className="skills-suggestions-dropdown">
+              {filteredSuggestions.map((skill) => (
+                <button
+                  key={skill}
+                  type="button"
+                  className="skills-suggestion-item"
+                  onClick={() => onAddSkill(skill)}
+                >
+                  {skill}
+                </button>
+              ))}
             </div>
           ) : null}
         </div>
@@ -2007,9 +1996,11 @@ function LanguagesModal({
 }) {
   if (!isOpen) return null;
 
+  const hasLanguages = selectedLanguages.length > 0;
+
   return (
     <div className="profile-modal-overlay">
-      <div className="profile-modal skills-modal">
+      <div className="profile-modal languages-modal">
         <div className="profile-modal-header">
           <div>
             <h2>Languages</h2>
@@ -2026,66 +2017,63 @@ function LanguagesModal({
           </button>
         </div>
 
-        <div className="profile-modal-body">
-          <div className="skills-search-wrap">
-            <label className="profile-form-label">Search languages</label>
+        <div className="profile-modal-body languages-modal-body">
+          <div className="profile-form-group full-width">
+            <label className="profile-form-label">Search for languages</label>
             <input
               type="text"
-              placeholder="e.g. English, Sinhala, Tamil"
+              placeholder="Example: English"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
+              className="languages-search-input"
             />
           </div>
 
-          {showSuggestions ? (
-            <div className="skills-suggestions-wrap">
-              {filteredSuggestions.length > 0 ? (
-                <div className="skills-suggestion-list">
-                  {filteredSuggestions.map((language) => (
-                    <button
-                      key={language}
-                      type="button"
-                      className="skills-suggestion-item"
-                      onClick={() => onAddLanguage(language)}
-                    >
-                      <FaPlus />
-                      <span>{language}</span>
-                    </button>
-                  ))}
+          <div className="languages-modal-section-title">ALL LANGUAGES</div>
+
+          {!hasLanguages ? (
+            <div className="languages-empty-state">
+              <div className="languages-empty-illustration">
+                <div className="languages-empty-illustration-bubble">
+                  <span>Aa</span>
                 </div>
-              ) : (
-                <p className="skills-empty-message">
-                  No matching languages found in the list.
-                </p>
-              )}
+              </div>
+
+              <h3>Show the languages you speak and write</h3>
+              <p>Search and select languages to add them to your profile.</p>
+            </div>
+          ) : (
+            <div className="languages-selected-list">
+              {selectedLanguages.map((language) => (
+                <div key={language} className="languages-selected-item">
+                  <span>{language}</span>
+                  <button
+                    type="button"
+                    className="languages-remove-btn"
+                    onClick={() => onRemoveLanguage(language)}
+                    aria-label={`Remove ${language}`}
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showSuggestions && filteredSuggestions.length > 0 ? (
+            <div className="languages-suggestions-dropdown">
+              {filteredSuggestions.map((language) => (
+                <button
+                  key={language}
+                  type="button"
+                  className="languages-suggestion-item"
+                  onClick={() => onAddLanguage(language)}
+                >
+                  {language}
+                </button>
+              ))}
             </div>
           ) : null}
-
-          <div className="skills-selected-wrap">
-            <h3>Selected languages</h3>
-
-            {selectedLanguages.length > 0 ? (
-              <div className="skills-selected-list">
-                {selectedLanguages.map((language) => (
-                  <span key={language} className="skills-selected-chip">
-                    <span>{language}</span>
-                    <button
-                      type="button"
-                      className="skills-remove-btn"
-                      onClick={() => onRemoveLanguage(language)}
-                      aria-label={`Remove ${language}`}
-                    >
-                      <FaTimes />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="skills-empty-message">
-                Search above and add languages to your list.
-              </p>
-            )}
-          </div>
         </div>
 
         <div className="profile-modal-footer">
