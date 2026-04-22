@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { moduleService } from '../services/moduleService';
-import { studyMaterialService } from '../services/studyMaterialService';
-import { formatDate, formatFileSize } from '../utils/formatters';
 import '../styles/structured-materials.css';
 
 const years = [1, 2, 3, 4];
@@ -10,7 +8,6 @@ const years = [1, 2, 3, 4];
 const StructuredStudyMaterialsPage = () => {
   const [loading, setLoading] = useState(true);
   const [modules, setModules] = useState([]);
-  const [materialsByModule, setMaterialsByModule] = useState({});
   const [expandedYears, setExpandedYears] = useState({});
 
   useEffect(() => {
@@ -26,22 +23,9 @@ const StructuredStudyMaterialsPage = () => {
         setLoading(false);
       }
     };
+
     fetchModules();
   }, []);
-
-  const handleModuleOpen = async (moduleName, year, semester) => {
-    if (materialsByModule[moduleName]) return;
-    try {
-      const response = await studyMaterialService.getByModule(moduleName, { year, semester });
-      setMaterialsByModule((current) => ({ 
-        ...current, 
-        [moduleName]: response.data?.materials || response.data || [] 
-      }));
-    } catch (error) {
-      toast.error('Failed to load module materials');
-      console.error('Error loading materials:', error);
-    }
-  };
 
   const toggleYear = (year) => {
     setExpandedYears((prev) => ({
@@ -50,23 +34,13 @@ const StructuredStudyMaterialsPage = () => {
     }));
   };
 
-  const getFileBadgeClass = (type) => {
-    if (!type) return 'file-badge file';
-    const typeUpper = type.toUpperCase();
-    if (typeUpper.includes('PDF')) return 'file-badge pdf';
-    if (typeUpper.includes('DOC')) return 'file-badge docx';
-    if (typeUpper.includes('XLS')) return 'file-badge xlsx';
-    if (typeUpper.includes('PPT')) return 'file-badge pptx';
-    if (typeUpper.includes('VIDEO')) return 'file-badge video';
-    if (typeUpper.includes('AUDIO')) return 'file-badge audio';
-    return 'file-badge file';
-  };
-
   if (loading) {
     return (
       <div className="loading-spinner">
         <div className="spinner"></div>
-        <p style={{ marginTop: '1rem', color: '#475569' }}>Loading structured study materials...</p>
+        <p style={{ marginTop: '1rem', color: '#475569' }}>
+          Loading structured study materials...
+        </p>
       </div>
     );
   }
@@ -80,7 +54,7 @@ const StructuredStudyMaterialsPage = () => {
 
       <div className="years-grid">
         {years.map((year) => {
-          const yearModules = modules.filter((item) => item.year === year);
+          const yearModules = modules.filter((item) => Number(item.year) === year);
           const isExpanded = expandedYears[year];
 
           return (
@@ -95,8 +69,10 @@ const StructuredStudyMaterialsPage = () => {
                     {yearModules.length} modules
                   </div>
                 </div>
+
+                {/* 🔽 SMALL MODERN ICON */}
                 <span className={`year-accordion-toggle ${isExpanded ? 'open' : ''}`}>
-                  ▼
+                  ⌄
                 </span>
               </button>
 
@@ -111,10 +87,10 @@ const StructuredStudyMaterialsPage = () => {
                       </p>
                     </div>
                   ) : (
-                    <div>
+                    <>
                       {[1, 2].map((semester) => {
                         const semesterModules = yearModules.filter(
-                          (item) => item.semester === semester
+                          (item) => Number(item.semester) === semester
                         );
 
                         return (
@@ -123,86 +99,27 @@ const StructuredStudyMaterialsPage = () => {
                               Semester {semester} ({semesterModules.length} modules)
                             </div>
 
-                            {semesterModules.length > 0 && (
-                              <>
-                                <div className="modules-list">
-                                  {semesterModules.map((module) => (
-                                    <button
-                                      key={module.id}
-                                      className="module-button"
-                                      onClick={() =>
-                                        handleModuleOpen(module.name, year, semester)
-                                      }
-                                    >
-                                      {module.name}
-                                    </button>
-                                  ))}
-                                </div>
-
-                                <div className="materials-list">
-                                  {semesterModules.map((module) => {
-                                    const items = materialsByModule[module.name] || [];
-
-                                    return (
-                                      <div
-                                        key={`${module.name}-materials`}
-                                        className="module-materials-section"
-                                      >
-                                        <div className="module-materials-title">
-                                          📚 {module.name}
-                                        </div>
-
-                                        {items.length === 0 ? (
-                                          <div className="empty-message">
-                                            No materials for this module.
-                                          </div>
-                                        ) : (
-                                          <div>
-                                            {items.map((item) => (
-                                              <div key={item.id} className="material-item">
-                                                <div className="material-info">
-                                                  <p className="material-title">
-                                                    <span
-                                                      className={getFileBadgeClass(
-                                                        item.file?.typeLabel
-                                                      )}
-                                                    >
-                                                      {item.file?.typeLabel || 'FILE'}
-                                                    </span>
-                                                    {item.title}
-                                                  </p>
-                                                  <p className="material-meta">
-                                                    {item.file?.size
-                                                      ? formatFileSize(item.file.size)
-                                                      : 'N/A'}{' '}
-                                                    • {formatDate(item.createdAt)}
-                                                  </p>
-                                                </div>
-                                                <a
-                                                  className="material-download-btn"
-                                                  href={`${
-                                                    import.meta.env.VITE_API_URL ||
-                                                    import.meta.env.REACT_APP_API_URL ||
-                                                    'http://localhost:5000'
-                                                  }/api/materials/${item.id}/download`}
-                                                  download
-                                                >
-                                                  Download
-                                                </a>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </>
+                            {semesterModules.length === 0 ? (
+                              <div className="empty-message">
+                                No modules in this semester.
+                              </div>
+                            ) : (
+                              <div className="modules-list">
+                                {semesterModules.map((module) => (
+                                  <button
+                                    key={module.id}
+                                    type="button"
+                                    className="module-button"
+                                  >
+                                    {module.name}
+                                  </button>
+                                ))}
+                              </div>
                             )}
                           </div>
                         );
                       })}
-                    </div>
+                    </>
                   )}
                 </div>
               )}
