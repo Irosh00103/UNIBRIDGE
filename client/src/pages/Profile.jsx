@@ -132,7 +132,7 @@ const Profile = () => {
                         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Required length &gt;= 5 characters if updating.</span>
                     </div>
 
-                    <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '16px', fontSize: '16px' }}>
+                    <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: 900 }}>
                         {loading ? 'Saving Changes...' : 'Save Profile Changes'}
                     </button>
                 </form>
