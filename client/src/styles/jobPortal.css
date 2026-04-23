@@ -513,11 +513,13 @@
   position: absolute;
   top: 30px;
   right: clamp(250px, 21vw, 420px);
+  width: min(620px, calc(100vw - 760px));
   z-index: 5;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 34px;
+  gap: 26px;
+  flex-wrap: wrap;
 }
 
 .hero-nav-link {
@@ -1415,7 +1417,8 @@
 @media (max-width: 1400px) {
   .hero-top-actions {
     right: clamp(220px, 18vw, 340px);
-    gap: 28px;
+    width: min(590px, calc(100vw - 660px));
+    gap: 22px;
   }
 
   .hero-nav-link,
@@ -1466,7 +1469,8 @@
   .hero-top-actions {
     top: 26px;
     right: 34px;
-    gap: 22px;
+    width: min(560px, calc(100vw - 420px));
+    gap: 18px;
   }
 
   .hero-nav-link,
@@ -1544,11 +1548,13 @@
 
   .hero-top-actions {
     top: 22px;
-    left: 20px;
-    right: auto;
+    right: 20px;
+    left: auto;
     gap: 18px;
     flex-wrap: wrap;
+    width: min(560px, calc(100% - 40px));
     max-width: calc(100% - 40px);
+    justify-content: flex-end;
   }
 
   .hero-nav-link,
@@ -1649,7 +1655,7 @@
     width: 100%;
     margin: 0 0 18px;
     gap: 16px;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
   }
 

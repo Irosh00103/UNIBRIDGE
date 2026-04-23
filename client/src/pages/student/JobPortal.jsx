@@ -1,10 +1,8 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FaBell,
   FaBriefcase,
   FaBullhorn,
-  FaBuilding,
   FaChartBar,
   FaCoins,
   FaCogs,
@@ -176,12 +174,7 @@ const JobPortal = () => {
         <div className="hero-top-actions">
           <Link to="/student/profile/professional" className="hero-nav-link">
             <FaRegUserCircle className="hero-nav-icon" />
-            <span>My Space</span>
-          </Link>
-
-          <Link to="/student/notifications" className="hero-nav-link">
-            <FaBell className="hero-nav-icon" />
-            <span>Alerts</span>
+            <span>Professional Profile</span>
           </Link>
 
           <button
@@ -200,11 +193,6 @@ const JobPortal = () => {
           >
             <FaTasks className="hero-nav-icon" />
             <span>How It Works</span>
-          </button>
-
-          <button type="button" className="hero-nav-btn employer-btn">
-            <FaBuilding className="hero-nav-icon" />
-            <span>For Employers</span>
           </button>
         </div>
 
