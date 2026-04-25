@@ -7,6 +7,7 @@ import { JobsProvider } from './context/JobsContext';
 
 // Components
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public Pages
@@ -64,14 +65,17 @@ function App() {
         <Route path="/job-portal/*" element={
           <ProtectedRoute role="student">
             <JobsProvider>
-              <Routes>
-                <Route path="/" element={<JobPortal />} />
-                <Route path="all" element={<JobPortalAll />} />
-                <Route path="categories/:slug" element={<JobPortalCategory />} />
-                <Route path="jobs/:id" element={<JobPortalDetail />} />
-                <Route path="saved" element={<JobPortalSaved />} />
-                <Route path="applications" element={<JobPortalApplications />} />
-              </Routes>
+              <>
+                <Routes>
+                  <Route path="/" element={<JobPortal />} />
+                  <Route path="all" element={<JobPortalAll />} />
+                  <Route path="categories/:slug" element={<JobPortalCategory />} />
+                  <Route path="jobs/:id" element={<JobPortalDetail />} />
+                  <Route path="saved" element={<JobPortalSaved />} />
+                  <Route path="applications" element={<JobPortalApplications />} />
+                </Routes>
+                <Footer />
+              </>
             </JobsProvider>
           </ProtectedRoute>
         } />
@@ -93,13 +97,13 @@ function App() {
                 <Route path="jobs/:id" element={<Navigate to="/student/job-portal" replace />} />
                 
                 {/* Job Portal Routes */}
-                <Route path="job-portal" element={<JobPortal />} />
-                <Route path="job-portal/all" element={<JobPortalAll />} />
-                <Route path="job-portal/categories/:slug" element={<JobPortalCategory />} />
-                <Route path="job-portal/jobs/:id" element={<JobPortalDetail />} />
-                <Route path="job-portal/saved" element={<JobPortalSaved />} />
-                <Route path="job-portal/applications" element={<JobPortalApplications />} />
-                <Route path="profile/professional" element={<ProfessionalProfile />} />
+                <Route path="job-portal" element={<><JobPortal /><Footer /></>} />
+                <Route path="job-portal/all" element={<><JobPortalAll /><Footer /></>} />
+                <Route path="job-portal/categories/:slug" element={<><JobPortalCategory /><Footer /></>} />
+                <Route path="job-portal/jobs/:id" element={<><JobPortalDetail /><Footer /></>} />
+                <Route path="job-portal/saved" element={<><JobPortalSaved /><Footer /></>} />
+                <Route path="job-portal/applications" element={<><JobPortalApplications /><Footer /></>} />
+                <Route path="profile/professional" element={<><ProfessionalProfile /><Footer /></>} />
                 <Route path="notifications" element={<AlertsPage />} />
 
 

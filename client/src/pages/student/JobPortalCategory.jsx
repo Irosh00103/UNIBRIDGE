@@ -5,10 +5,8 @@ import {
   FaMapMarkerAlt,
   FaChevronDown,
   FaRegClock,
-  FaBookmark,
-  FaRegBookmark,
+  FaHome,
 } from "react-icons/fa";
-import { useJobs } from "../../context/JobsContext";
 import { getJobs } from "../../services/api";
 import {
   getPortalCategoryBySlug,
@@ -47,13 +45,16 @@ const formatDateLabel = (value) => {
   });
 };
 
-const FALLBACK_JOB_TYPES = ["Internship", "Graduate Role", "Full-time", "Part-time"];
-const FALLBACK_EXPERIENCE = ["Fresh Graduate", "0 - 1 year", "1 - 2 years"];
+const FALLBACK_JOB_TYPES = ["Internship", "Graduate Role", "Full-time", "Part-time", "Contract", "Temporary"];
+const FALLBACK_EXPERIENCE = ["Fresh Graduate", "Entry Level", "0 - 1 year", "1 - 2 years", "Mid Level"];
 const FALLBACK_WORK_MODES = ["On-site", "Hybrid", "Remote"];
+
+const mergeOptions = (fallbackOptions, backendOptions) => [
+  ...new Set([...fallbackOptions, ...backendOptions].filter(Boolean)),
+];
 
 function JobPortalCategory() {
   const { slug } = useParams();
-  const { isJobSaved, saveJob, unsaveJob } = useJobs();
   const [filters, setFilters] = useState(initialFilters);
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,21 +116,29 @@ function JobPortalCategory() {
     });
   }, [normalizedCategoryJobs, filters]);
 
-  const uniqueJobTypes = useMemo(() => {
-    return [...new Set(normalizedCategoryJobs.map((job) => job.type).filter(Boolean))];
-  }, [normalizedCategoryJobs]);
+  const normalizedAllJobs = useMemo(() => {
+    return jobs.map((job) => ({
+      ...job,
+      type: pickFirstValue(job, ["type", "jobType", "employmentType"]),
+      experience: pickFirstValue(job, ["experience", "careerLevel", "experienceLevel"]),
+      workMode: pickFirstValue(job, ["workMode", "mode", "remoteWork"]),
+    }));
+  }, [jobs]);
 
-  const uniqueExperiences = useMemo(() => {
-    return [...new Set(normalizedCategoryJobs.map((job) => job.experience).filter(Boolean))];
-  }, [normalizedCategoryJobs]);
+  const selectableJobTypes = useMemo(() => {
+    const backendTypes = normalizedAllJobs.map((job) => job.type);
+    return mergeOptions(FALLBACK_JOB_TYPES, backendTypes);
+  }, [normalizedAllJobs]);
 
-  const uniqueWorkModes = useMemo(() => {
-    return [...new Set(normalizedCategoryJobs.map((job) => job.workMode).filter(Boolean))];
-  }, [normalizedCategoryJobs]);
+  const selectableExperiences = useMemo(() => {
+    const backendExperiences = normalizedAllJobs.map((job) => job.experience);
+    return mergeOptions(FALLBACK_EXPERIENCE, backendExperiences);
+  }, [normalizedAllJobs]);
 
-  const selectableJobTypes = uniqueJobTypes.length > 0 ? uniqueJobTypes : FALLBACK_JOB_TYPES;
-  const selectableExperiences = uniqueExperiences.length > 0 ? uniqueExperiences : FALLBACK_EXPERIENCE;
-  const selectableWorkModes = uniqueWorkModes.length > 0 ? uniqueWorkModes : FALLBACK_WORK_MODES;
+  const selectableWorkModes = useMemo(() => {
+    const backendModes = normalizedAllJobs.map((job) => job.workMode);
+    return mergeOptions(FALLBACK_WORK_MODES, backendModes);
+  }, [normalizedAllJobs]);
 
   const handleChange = (key, value) => {
     setFilters((prev) => ({
@@ -140,18 +149,6 @@ function JobPortalCategory() {
 
   const handleReset = () => {
     setFilters(initialFilters);
-  };
-
-  const toggleSave = async (job) => {
-    const jobId = job._id || job.id;
-    if (!jobId) return;
-
-    if (isJobSaved(jobId)) {
-      await unsaveJob(jobId);
-      return;
-    }
-
-    await saveJob(job);
   };
 
   if (isLoading) {
@@ -173,7 +170,7 @@ function JobPortalCategory() {
           <div className="category-empty-state">
             <h2>Category not found</h2>
             <p>The category you selected does not exist.</p>
-            <Link to="/" className="category-back-home-btn">
+            <Link to="/student/job-portal" className="category-back-home-btn">
               Back to Home
             </Link>
           </div>
@@ -186,10 +183,14 @@ function JobPortalCategory() {
     <div className="category-page">
       <section className="category-page-header">
         <div className="category-page-container">
+          <div className="category-page-topbar">
+            <Link to="/student/job-portal" className="category-home-link">
+              <FaHome />
+              <span>Back to Home</span>
+            </Link>
+          </div>
+
           <h1>Available Jobs</h1>
-          <p className="category-subtitle">
-            {category?.name || "Category"} opportunities tailored for students and recent graduates.
-          </p>
 
           <div className="category-search-row">
             <div className="category-search-box">
@@ -308,22 +309,7 @@ function JobPortalCategory() {
                       <span>{formatDateLabel(job.postedDate || job.createdAt || job.deadline)}</span>
                     </div>
 
-                    <div className="category-top-actions">
-                      <span
-                        className={`category-type-badge ${String(job.type || "Open").toLowerCase() === "open" ? "open" : ""}`}
-                      >
-                        {job.type || "Open"}
-                      </span>
-                      <button
-                        type="button"
-                        className={`category-save-btn ${isJobSaved(job._id || job.id) ? "saved" : ""}`}
-                        onClick={() => toggleSave(job)}
-                        aria-label={isJobSaved(job._id || job.id) ? "Unsave job" : "Save job"}
-                        title={isJobSaved(job._id || job.id) ? "Unsave job" : "Save job"}
-                      >
-                        {isJobSaved(job._id || job.id) ? <FaBookmark /> : <FaRegBookmark />}
-                      </button>
-                    </div>
+                    <span className="category-type-badge">{job.type || "Open"}</span>
                   </div>
 
                   <div className="category-job-body">

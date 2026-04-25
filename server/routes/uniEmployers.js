@@ -8,6 +8,13 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const { auth, requireRole } = require('../middleware/auth');
 
+const isStudentOpenToOpportunities = (studentProfile) => {
+  return Boolean(studentProfile?.isAvailable) || (
+    typeof studentProfile?.availabilityStatus === 'string' &&
+    studentProfile.availabilityStatus !== 'not-available'
+  );
+};
+
 router.get('/all', async (req, res) => {
   try {
     const employers = await Employer.find().populate('userId', 'email').select('-__v');
@@ -64,7 +71,7 @@ router.get('/students/search', auth, async (req, res) => {
       return res.status(404).json({ message: 'Student profile not found' });
     }
 
-    if (!studentProfile.isAvailable) {
+    if (!isStudentOpenToOpportunities(studentProfile)) {
       return res.status(403).json({ message: 'Student is currently not available for opportunities' });
     }
 

@@ -14,6 +14,11 @@ const studentSchema = new mongoose.Schema({
   
   // Enhanced Profile completion fields
   isAvailable: { type: Boolean, default: false },
+  availabilityStatus: {
+    type: String,
+    enum: ['not-available', 'open-opportunities', 'actively-job-hunting'],
+    default: 'not-available'
+  },
   
   targetJob: {
     jobTitle: { type: String, default: '' },

@@ -10,7 +10,8 @@ const app = express();
 
 // Middleware
 app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'], credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -58,6 +59,18 @@ mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI)
   .catch(err => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use.`);
+    console.error(`Stop the existing process or set a different PORT in server/.env.`);
+    console.error(`On Windows, run: netstat -ano -p tcp | findstr :${PORT}`);
+    process.exit(1);
+  }
+
+  console.error('Server failed to start:', err);
+  process.exit(1);
 });

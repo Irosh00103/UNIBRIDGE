@@ -1,182 +1,516 @@
-import React, { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useJobs } from '../../context/JobsContext';
-import { portalCategories, mapJobToPortalCategory } from '../../data/jobsData';
+import React, { useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  FaProjectDiagram, FaChartBar, FaMicrochip, FaBriefcase,
-  FaHardHat, FaBullhorn, FaSearch, FaCogs, FaHeadset,
-  FaCoins, FaGraduationCap, FaUsers, FaBookmark, FaRegBookmark,
-} from 'react-icons/fa';
-import '../../styles/jobPortal.css';
+  FaBriefcase,
+  FaBullhorn,
+  FaChartBar,
+  FaCoins,
+  FaCogs,
+  FaFileAlt,
+  FaGraduationCap,
+  FaHardHat,
+  FaHeadset,
+  FaMapMarkerAlt,
+  FaMicrochip,
+  FaPaperPlane,
+  FaProjectDiagram,
+  FaRegClock,
+  FaRegUserCircle,
+  FaSearch,
+  FaTasks,
+  FaThLarge,
+  FaUserGraduate,
+  FaUsers,
+} from "react-icons/fa";
+import { useJobs } from "../../context/JobsContext";
+import { mapJobToPortalCategory, portalCategories } from "../../data/jobsData";
+import "../../styles/jobPortal.css";
 
-const iconMap = {
-  other: FaProjectDiagram, sales: FaChartBar, software: FaMicrochip,
-  finance: FaBriefcase, engineering: FaHardHat, marketing: FaBullhorn,
-  admin: FaSearch, production: FaCogs, customer: FaHeadset,
-  banking: FaCoins, education: FaGraduationCap, hr: FaUsers,
+import dialogLogo from "../../assets/company-logos/dialog.jpg";
+import masLogo from "../../assets/company-logos/mas1.png";
+import johnKeellsLogo from "../../assets/company-logos/johnkeells.jpg";
+import comBankLogo from "../../assets/company-logos/combank.png";
+import hnbLogo from "../../assets/company-logos/hnb.png";
+import sltMobitelLogo from "../../assets/company-logos/sltmobitel.jpg";
+import sampathLogo from "../../assets/company-logos/sampath.png";
+import cargillsLogo from "../../assets/company-logos/cargills1.png";
+
+const companyLogos = [
+  { name: "Dialog", logo: dialogLogo },
+  { name: "MAS Holdings", logo: masLogo },
+  { name: "John Keells", logo: johnKeellsLogo },
+  { name: "Commercial Bank", logo: comBankLogo },
+  { name: "HNB", logo: hnbLogo },
+  { name: "SLT Mobitel", logo: sltMobitelLogo },
+  { name: "Sampath Bank", logo: sampathLogo },
+  { name: "Cargills", logo: cargillsLogo },
+];
+
+const categoryIconMap = {
+  other: FaProjectDiagram,
+  sales: FaChartBar,
+  software: FaMicrochip,
+  finance: FaBriefcase,
+  engineering: FaHardHat,
+  marketing: FaBullhorn,
+  admin: FaSearch,
+  production: FaCogs,
+  customer: FaHeadset,
+  banking: FaCoins,
+  education: FaGraduationCap,
+  hr: FaUsers,
 };
 
-const CompanyMarquee = () => {
-    const companies = [
-        { name: 'Dialog Axiata', icon: '📶' },
-        { name: 'SLT-MOBITEL', icon: '📞' },
-        { name: 'WSO2', icon: '⚡' },
-        { name: 'IFS', icon: '🏢' },
-        { name: 'Virtusa', icon: '🌐' },
-        { name: 'HNB', icon: '🏦' },
-        { name: 'DFCC Bank', icon: '💰' },
-        { name: 'Sysco LABS', icon: '🍔' },
-        { name: 'PickMe', icon: '🚕' },
-        { name: '99x', icon: '🚀' },
-        { name: 'Pearson', icon: '📚' },
-        { name: 'Brandix', icon: '👕' }
-    ];
+const getJobId = (job) => job.id || job._id;
 
-    // Duplicate list for seamless loop
-    const combined = [...companies, ...companies];
-
-    return (
-        <div className="jp-marquee-wrapper">
-            <div className="jp-marquee-content">
-                {combined.map((c, idx) => (
-                    <div key={idx} className="jp-marquee-item">
-                        <span className="marquee-logo">{c.icon}</span>
-                        <span>{c.name}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
+const getDeadlineLabel = (job) =>
+  job.deadline || job.applicationDeadline || job.closingDate || "Open now";
 
 const JobPortal = () => {
-  const { jobs, jobsLoading, jobsError, isJobSaved, saveJob, unsaveJob } = useJobs();
+  const { jobs = [], jobsLoading, jobsError } = useJobs();
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
+  const categoriesRef = useRef(null);
+  const howItWorksRef = useRef(null);
 
-  const featuredJobs = useMemo(() => {
-    let filtered = jobs;
-    if (keyword) {
-      const k = keyword.toLowerCase();
-      filtered = filtered.filter(j =>
-        [j.title, j.company, j.category, ...(j.skills || [])].join(' ').toLowerCase().includes(k)
-      );
-    }
-    if (locationFilter) {
-      const l = locationFilter.toLowerCase();
-      filtered = filtered.filter(j => (j.location || '').toLowerCase().includes(l));
-    }
-    return filtered.slice(0, 6);
-  }, [jobs, keyword, locationFilter]);
+  const [keyword, setKeyword] = useState("");
+  const [location, setLocation] = useState("");
+  const [showKeywordSuggestions, setShowKeywordSuggestions] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
   const categories = useMemo(() => {
-    const withCounts = portalCategories.map(cat => ({
+    const withCounts = portalCategories.map((cat) => ({
       ...cat,
-      count: jobs.filter(j => mapJobToPortalCategory(j) === cat.slug).length,
+      count: jobs.filter((job) => mapJobToPortalCategory(job) === cat.slug)
+        .length,
     }));
-    const withJobs = withCounts.filter(c => c.count > 0).sort((a, b) => b.count - a.count || a.order - b.order);
-    const noJobs = withCounts.filter(c => c.count === 0).sort((a, b) => a.order - b.order);
-    return [...withJobs, ...noJobs];
+    const withJobs = withCounts
+      .filter((cat) => cat.count > 0)
+      .sort((a, b) => b.count - a.count || a.order - b.order);
+    const withoutJobs = withCounts
+      .filter((cat) => cat.count === 0)
+      .sort((a, b) => a.order - b.order);
+
+    return [...withJobs, ...withoutJobs];
   }, [jobs]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    navigate(`/student/job-portal/all?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(locationFilter)}`);
+  const keywordSuggestions = useMemo(() => {
+    const search = keyword.trim().toLowerCase();
+    if (!search) return [];
+
+    const suggestions = [];
+    jobs.forEach((job) => {
+      const values = [
+        job.title,
+        job.company,
+        job.employerName,
+        job.type,
+        job.category,
+        job.qualification,
+        ...(job.skills || []),
+      ];
+
+      values.forEach((value) => {
+        if (
+          value &&
+          value.toLowerCase().includes(search) &&
+          !suggestions.includes(value)
+        ) {
+          suggestions.push(value);
+        }
+      });
+    });
+
+    return suggestions.slice(0, 8);
+  }, [jobs, keyword]);
+
+  const locationSuggestions = useMemo(() => {
+    const search = location.trim().toLowerCase();
+    if (!search) return [];
+
+    return [...new Set(jobs.map((job) => job.location).filter(Boolean))]
+      .filter((item) => item.toLowerCase().includes(search))
+      .slice(0, 8);
+  }, [jobs, location]);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (keyword.trim()) {
+      params.set("keyword", keyword.trim());
+    }
+
+    if (location.trim()) {
+      params.set("location", location.trim());
+    }
+
+    const query = params.toString();
+    navigate(`/student/job-portal/all${query ? `?${query}` : ""}`);
   };
 
-  const toggleSave = async (job) => {
-    if (isJobSaved(job.id)) {
-      await unsaveJob(job.id);
-      return;
+  const handleSearchKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSearch();
     }
-    await saveJob(job);
+  };
+
+  const handleScrollToCategories = () => {
+    categoriesRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const handleScrollToHowItWorks = () => {
+    howItWorksRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return (
-    <div className="jp-home fade-in-up">
-      {/* Hero */}
-      <section className="jp-hero">
-        <CompanyMarquee />
-        <h1>Find Your <span>Dream Job</span></h1>
-        <p>Discover internships, graduate roles, and career opportunities curated for university students.</p>
-        <form className="jp-search-bar" onSubmit={handleSearch}>
-          <input placeholder="Job title, skill, or keyword…" value={keyword} onChange={e => setKeyword(e.target.value)} />
-          <input placeholder="Location…" value={locationFilter} onChange={e => setLocationFilter(e.target.value)} />
-          <button type="submit" className="jp-search-btn">Search Jobs</button>
-        </form>
-      </section>
+    <div className="home-page">
+      <section className="hero-section">
+        <div className="hero-top-actions">
+          <Link to="/student/profile/professional" className="hero-nav-link">
+            <FaRegUserCircle className="hero-nav-icon" />
+            <span>Professional Profile</span>
+          </Link>
 
-      {/* Stats */}
-      <div className="jp-stats">
-        <div className="jp-stat-item"><div className="jp-stat-value">{jobs.length}</div><div className="jp-stat-label">Available Jobs</div></div>
-        <div className="jp-stat-item"><div className="jp-stat-value">{new Set(jobs.map(j => j.company)).size}</div><div className="jp-stat-label">Companies</div></div>
-        <div className="jp-stat-item"><div className="jp-stat-value">{categories.filter(c => c.count > 0).length}</div><div className="jp-stat-label">Categories</div></div>
-      </div>
+          <button
+            type="button"
+            className="hero-nav-link hero-nav-link-btn"
+            onClick={handleScrollToCategories}
+          >
+            <FaThLarge className="hero-nav-icon" />
+            <span>Categories</span>
+          </button>
 
-      {/* Featured Jobs */}
-      <div className="jp-section-header">
-        <h2>Featured <span>Opportunities</span></h2>
-        <Link to="/student/job-portal/all">View all jobs →</Link>
-      </div>
+          <button
+            type="button"
+            className="hero-nav-link hero-nav-link-btn"
+            onClick={handleScrollToHowItWorks}
+          >
+            <FaTasks className="hero-nav-icon" />
+            <span>How It Works</span>
+          </button>
+        </div>
 
-      {jobsError && <div className="alert alert-error">{jobsError}</div>}
+        <div className="hero-content">
+          <p className="hero-kicker">For Students & Fresh Graduates</p>
 
-      {jobsLoading ? (
-        <div className="loading">Loading opportunities…</div>
-      ) : featuredJobs.length === 0 ? (
-        <div className="empty-state"><div style={{ fontSize: 48, marginBottom: 16 }}>💼</div><h3>No jobs found</h3><p>Try different keywords or check back later.</p></div>
-      ) : (
-        <div className="jp-featured-grid">
-          {featuredJobs.map(job => (
-            <div key={job.id} className="jp-job-card">
-              <div className="jp-card-top">
-                <span className="jp-card-badge">{job.type || job.status}</span>
-                <button className={`jp-save-btn ${isJobSaved(job.id) ? 'saved' : ''}`} onClick={() => toggleSave(job)} title={isJobSaved(job.id) ? 'Unsave' : 'Save'}>
-                  {isJobSaved(job.id) ? <FaBookmark /> : <FaRegBookmark />}
-                </button>
-              </div>
-              <div className="jp-card-title">{job.title}</div>
-              <div className="jp-card-company">🏢 {job.company || job.employerName}</div>
-              <div className="jp-card-meta">
-                {job.location && <span className="jp-meta-tag">📍 {job.location}</span>}
-                {job.workMode && <span className="jp-meta-tag">🏠 {job.workMode}</span>}
-                {job.experience && <span className="jp-meta-tag">📊 {job.experience}</span>}
-              </div>
-              <div className="jp-card-desc">{job.sideSummary || job.overview || job.description}</div>
-              {job.skills?.length > 0 && (
-                <div className="jp-card-skills">
-                  {job.skills.slice(0, 4).map(s => <span key={s} className="jp-skill-tag">{s}</span>)}
+          <h1 className="hero-title">
+            <span className="title-line-1">Launch Your Career</span>
+            <span className="title-line-2">With Confidence</span>
+          </h1>
+
+          <p className="subtitle">
+            Discover internships, entry-level roles, and graduate opportunities
+            built for students and fresh graduates ready to take the next step.
+          </p>
+
+          <div className="search-wrapper">
+            <div className="search-field keyword-field search-field-with-suggestions">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Job title, keyword, or company"
+                value={keyword}
+                onBlur={() => setShowKeywordSuggestions(false)}
+                onChange={(event) => {
+                  setKeyword(event.target.value);
+                  setShowKeywordSuggestions(true);
+                }}
+                onFocus={() => setShowKeywordSuggestions(true)}
+                onKeyDown={handleSearchKeyDown}
+                autoComplete="off"
+              />
+
+              {showKeywordSuggestions && keywordSuggestions.length > 0 && (
+                <div className="search-suggestions-dropdown">
+                  {keywordSuggestions.map((item, index) => (
+                    <button
+                      key={`${item}-${index}`}
+                      type="button"
+                      className="search-suggestion-item"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setKeyword(item);
+                        setShowKeywordSuggestions(false);
+                      }}
+                    >
+                      {item}
+                    </button>
+                  ))}
                 </div>
               )}
-              <div className="jp-card-actions">
-                <Link to={`/student/job-portal/jobs/${job.id}`} className="jp-view-btn">View Details</Link>
+            </div>
+
+            <div className="search-divider" />
+
+            <div className="search-field location-field search-field-with-suggestions">
+              <FaMapMarkerAlt className="search-icon" />
+              <input
+                type="text"
+                placeholder="Location"
+                value={location}
+                onBlur={() => setShowLocationSuggestions(false)}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  setShowLocationSuggestions(true);
+                }}
+                onFocus={() => setShowLocationSuggestions(true)}
+                onKeyDown={handleSearchKeyDown}
+                autoComplete="off"
+              />
+
+              {showLocationSuggestions && locationSuggestions.length > 0 && (
+                <div className="search-suggestions-dropdown">
+                  {locationSuggestions.map((item, index) => (
+                    <button
+                      key={`${item}-${index}`}
+                      type="button"
+                      className="search-suggestion-item"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setLocation(item);
+                        setShowLocationSuggestions(false);
+                      }}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button className="search-btn" onClick={handleSearch} type="button">
+              Search Jobs
+            </button>
+          </div>
+
+          <div className="floating-cards-row">
+            <div className="mini-card">
+              <div className="mini-card-icon">
+                <FaBriefcase />
+              </div>
+              <div className="mini-card-content">
+                <p className="mini-card-label">Open Roles</p>
+                <h3>{jobs.length || "0"}+</h3>
+                <p className="mini-card-text">Internships and graduate roles</p>
               </div>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Categories */}
-      <section className="jp-categories-section">
-        <div className="jp-section-header">
-          <h2>Browse by <span>Category</span></h2>
+            <div className="mini-card">
+              <div className="mini-card-icon alt">
+                <FaUserGraduate />
+              </div>
+              <div className="mini-card-content">
+                <p className="mini-card-label">Top Employers</p>
+                <h3>{new Set(jobs.map((job) => job.company || job.employerName).filter(Boolean)).size || "0"}+</h3>
+                <p className="mini-card-text">Companies hiring fresh graduates</p>
+              </div>
+            </div>
+
+            <div className="mini-card">
+              <div className="mini-card-icon third">
+                <FaSearch />
+              </div>
+              <div className="mini-card-content">
+                <p className="mini-card-label">Fast Search</p>
+                <h3>Smart</h3>
+                <p className="mini-card-text">Find matching roles in minutes</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="jp-category-grid">
-          {categories.map(cat => {
-            const Icon = iconMap[cat.accent] || FaProjectDiagram;
-            return (
-              <Link key={cat.slug} to={`/student/job-portal/categories/${cat.slug}`} className="jp-category-card">
-                <div className="jp-category-icon-wrap">
-                  <Icon className="jp-category-icon" />
+      </section>
+
+      <section className="recent-jobs-section">
+        <div className="recent-jobs-container">
+          <div className="recent-jobs-heading">
+            <h2>
+              Recent <span>Jobs</span>
+            </h2>
+          </div>
+
+          {jobsError && <div className="alert alert-error">{jobsError}</div>}
+
+          {jobsLoading ? (
+            <div className="loading">Loading jobs...</div>
+          ) : jobs.length === 0 ? (
+            <div className="empty-state">
+              <h3>No jobs found</h3>
+              <p>Try different keywords or check back later.</p>
+            </div>
+          ) : (
+            <div className="recent-jobs-grid">
+              {jobs.slice(0, 8).map((job) => (
+                <article key={getJobId(job)} className="recent-job-card">
+                  <div className="recent-job-top">
+                    <div className="job-deadline">
+                      <FaRegClock />
+                      <span>{getDeadlineLabel(job)}</span>
+                    </div>
+
+                    <span className="job-type-badge">
+                      {job.type || job.status || "Open"}
+                    </span>
+                  </div>
+
+                  <div className="recent-job-body">
+                    <p className="job-company-name">
+                      {job.company || job.employerName || "Company"}
+                    </p>
+                    <h3 className="job-role-title">{job.title}</h3>
+
+                    {job.location && (
+                      <p className="job-location">
+                        <FaMapMarkerAlt />
+                        <span>{job.location}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <Link
+                    to={`/student/job-portal/jobs/${getJobId(job)}`}
+                    className="apply-job-btn"
+                  >
+                    Apply Now
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
+
+          <div className="recent-jobs-footer">
+            <Link to="/student/job-portal/all" className="see-all-jobs-btn">
+              See All
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="job-categories-section" ref={categoriesRef}>
+        <div className="job-categories-container">
+          <div className="job-categories-heading">
+            <h2>
+              Find Your Jobs By <span>Category</span>
+            </h2>
+          </div>
+
+          <div className="job-categories-grid">
+            {categories.map((category) => {
+              const Icon = categoryIconMap[category.accent] || FaProjectDiagram;
+
+              return (
+                <Link
+                  key={category.slug}
+                  to={`/student/job-portal/categories/${category.slug}`}
+                  className="job-category-card"
+                >
+                  <div className="job-category-text">
+                    <h3>{category.name}</h3>
+                    <p>
+                      {category.count} Job{category.count !== 1 ? "s" : ""} Available
+                    </p>
+                  </div>
+
+                  <div className="job-category-art">
+                    <div className="art-circle"></div>
+                    <Icon className="job-category-icon" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="how-it-works-section" ref={howItWorksRef}>
+        <div className="how-it-works-container">
+          <div className="how-it-works-heading">
+            <h2>
+              How It <span>Works</span>
+            </h2>
+            <p>
+              Everything students need to explore jobs, apply easily, build
+              their full profile, and manage their career journey in one place.
+            </p>
+          </div>
+
+          <div className="how-it-works-grid">
+            <article className="how-it-works-card">
+              <div className="how-card-icon">
+                <FaSearch />
+              </div>
+              <h3>Browse Jobs</h3>
+              <p>
+                Explore internships, entry-level roles, and graduate
+                opportunities. Students can search jobs, browse by categories,
+                and discover roles that match their interests and goals.
+              </p>
+            </article>
+
+            <article className="how-it-works-card">
+              <div className="how-card-icon alt">
+                <FaFileAlt />
+              </div>
+              <h3>Set Up Your Profile</h3>
+              <p>
+                Build your complete profile with personal details, target job,
+                skills, education, qualifications, and work experience in one
+                built-in CV-style format without uploading a separate CV.
+              </p>
+            </article>
+
+            <article className="how-it-works-card">
+              <div className="how-card-icon third">
+                <FaPaperPlane />
+              </div>
+              <h3>Apply With Screening Answers</h3>
+              <p>
+                Apply directly to jobs by answering employer screening
+                questions. Your profile already contains the key information
+                employers need, making applications faster and more organized.
+              </p>
+            </article>
+
+            <article className="how-it-works-card">
+              <div className="how-card-icon fourth">
+                <FaTasks />
+              </div>
+              <h3>Track, Save & Get Alerts</h3>
+              <p>
+                Save job posts, track your applications and their status, and
+                receive employer alerts so you can stay updated and never miss
+                the right opportunity.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="top-companies-section">
+        <div className="top-companies-container">
+          <div className="top-companies-heading">
+            <h2>
+              Top Companies <span>Hiring</span>
+            </h2>
+          </div>
+
+          <div className="logo-marquee">
+            <div className="logo-marquee-track">
+              {[...companyLogos, ...companyLogos].map((company, index) => (
+                <div
+                  className="logo-marquee-item"
+                  key={`${company.name}-${index}`}
+                >
+                  <img src={company.logo} alt={company.name} />
                 </div>
-                <div className="jp-category-content">
-                  <div className="jp-category-title">{cat.name}</div>
-                  <div className="jp-category-count">{cat.count} Job{cat.count !== 1 ? 's' : ''} Available</div>
-                </div>
-              </Link>
-            );
-          })}
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>

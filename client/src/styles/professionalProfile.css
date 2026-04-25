@@ -1,951 +1,2108 @@
-/* professionalProfile.css - Light Theme with Detailed Modals */
+/* =========================
+   PROFESSIONAL PROFILE CSS
+   Scoped to .myspace-page
+   ========================= */
 
-.prof-profile-page {
-  padding: 100px 24px 60px;
-  background-color: #f8fafc;
+.myspace-page {
+  --pp-bg: linear-gradient(180deg, #eef4fb 0%, #f7f9fc 100%);
+  --pp-surface: #ffffff;
+  --pp-surface-2: #f8fbff;
+  --pp-border: #d9e4f2;
+  --pp-border-strong: #c7d7ea;
+  --pp-text: #152238;
+  --pp-text-soft: #52627a;
+  --pp-text-muted: #7b8aa3;
+  --pp-primary: #2684ff;
+  --pp-primary-2: #1f6fe0;
+  --pp-primary-soft: #e8f2ff;
+  --pp-success: #1fbf75;
+  --pp-success-soft: #eaf9f1;
+  --pp-warning: #f4b740;
+  --pp-warning-soft: #fff5df;
+  --pp-danger: #d9534f;
+  --pp-danger-soft: #fff0ef;
+  --pp-shadow: 0 12px 30px rgba(31, 79, 140, 0.08);
+  --pp-shadow-soft: 0 8px 18px rgba(31, 79, 140, 0.05);
+  --pp-radius: 18px;
+  --pp-radius-sm: 12px;
+  --pp-page-width: 1360px;
+
+  width: 100%;
   min-height: 100vh;
+  padding: 112px 0 48px;
+  background: var(--pp-bg);
+  color: var(--pp-text);
+  box-sizing: border-box;
 }
 
-.prof-container {
-  max-width: 1200px;
+.myspace-page *,
+.myspace-page *::before,
+.myspace-page *::after {
+  box-sizing: border-box;
+}
+
+.myspace-page .container {
+  width: min(var(--pp-page-width), calc(100% - 40px));
   margin: 0 auto;
 }
 
-/* Header Card */
-.prof-header-card {
-  background: white;
-  border-radius: var(--radius-xl);
-  padding: 40px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 30px;
-  border: 1px solid #e2e8f0;
-}
-
-.prof-user-info {
-  display: flex;
-  gap: 30px;
-  align-items: center;
-}
-
-.prof-avatar {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 36px;
-  font-weight: 800;
-  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-  overflow: hidden;
-}
-
-.prof-title-group h1 {
-  font-size: 32px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  color: #1e293b;
-}
-
-.headline-text {
-  color: #64748b;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.prof-contact-meta {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #94a3b8;
-  display: flex;
-  gap: 20px;
-}
-
-/* Status Toggle */
-.status-toggle-card {
-  background: #f1f5f9;
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 250px;
-}
-
-.status-info strong {
-  display: block;
-  font-size: 16px;
-  color: #1e293b;
-}
-
-.status-info p {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 4px;
-}
-
-.status-toggle {
+.myspace-page .myspace-shell {
   width: 100%;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  border: none;
-  background: #cbd5e1;
-  color: #475569;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.status-toggle.available {
-  background: #22c55e;
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.39);
-}
-
-/* Layout */
-.prof-main-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 30px;
-}
-
-/* Sidebar */
-.completion-card {
-  background: white;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  border: 1px solid #e2e8f0;
-  margin-bottom: 24px;
-}
-
-.completion-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.completion-header strong { font-size: 15px; }
-.completion-header span { color: var(--primary); font-weight: 800; }
-
-.progress-bar {
-  height: 8px;
-  background: #f1f5f9;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--primary);
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.prof-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.prof-nav-item {
-  padding: 14px 20px;
-  border-radius: var(--radius-md);
-  border: none;
-  background: transparent;
-  color: #64748b;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.prof-nav-item:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-.prof-nav-item.active {
-  background: white;
-  color: var(--primary);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
-}
-
-/* Sections */
-.prof-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.prof-section-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-}
-
-.section-header {
-  padding: 24px 30px;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 1;
-  transform: none;
-  margin-bottom: 0;
-  text-align: left;
-}
-
-.title-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.section-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.not-started-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: #fef2f2;
-  color: #ef4444;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.add-btn {
-  color: var(--primary);
-  background: transparent;
-  border: 1px solid var(--primary);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-
-.add-btn:hover {
-  background: var(--primary);
-  color: white;
-}
-
-.section-body {
-  padding: 30px;
-}
-
-.empty-hint {
-  color: #94a3b8;
-  font-style: italic;
-  font-size: 14px;
-}
-
-/* Data Display */
-.data-display {
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: var(--radius-md);
-  margin-bottom: 10px;
-}
-
-.data-item {
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 15px;
-  margin-bottom: 15px;
-}
-
-.data-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.skill-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.skill-tag {
-  padding: 6px 16px;
-  background: #f1f5f9;
-  color: #475569;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Detailed Modal Styles */
-.prof-modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(8px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.prof-modal {
-  background: white;
-  width: 100%;
-  max-width: min(760px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
-  min-height: 420px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
-  animation: modalIn 0.3s ease-out;
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-header {
-  padding: 24px 30px;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.modal-header h3 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.modal-header p {
-  font-size: 14px;
-  color: #64748b;
-  margin-top: 4px;
-}
-
-.close-btn {
-  background: #f1f5f9;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #64748b;
-  transition: all 0.2s;
-}
-
-.close-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.modal-body {
-  padding: 30px;
-  overflow-y: auto;
-  max-height: calc(100vh - 260px);
-}
-
-.modal-footer {
-  padding: 20px 30px;
-  background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-}
-
-/* Form Layouts within Modals */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 28px;
   align-items: start;
 }
 
-.form-group {
-  margin-bottom: 16px;
+.myspace-page .myspace-left {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  min-width: 0;
+  max-height: calc(100vh - 108px);
 }
 
-.form-group.full-width {
-  grid-column: span 2;
+.myspace-page .fixed-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(100vh - 108px);
 }
 
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 8px;
+.myspace-page .myspace-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding-bottom: max(380px, 46vh);
 }
 
-.form-group input, 
-.form-group select, 
-.form-group textarea {
-  width: 100%;
-  min-height: 46px;
-  padding: 12px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  line-height: 1.4;
-  transition: all 0.2s;
+.myspace-page .myspace-right > .info-card {
+  scroll-margin-top: 132px;
 }
 
-.form-group textarea {
-  min-height: 120px;
-  resize: vertical;
+@media (min-width: 993px) {
+  .myspace-page {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+    padding-bottom: 24px;
+  }
+
+  .myspace-page .container {
+    height: 100%;
+  }
+
+  .myspace-page .myspace-shell {
+    height: calc(100vh - 136px);
+  }
+
+  .myspace-page .myspace-left {
+    position: relative;
+    top: 0;
+    height: 100%;
+    max-height: none;
+  }
+
+  .myspace-page .fixed-sidebar {
+    height: 100%;
+    max-height: none;
+  }
+
+  .myspace-page .myspace-right {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 6px;
+    padding-bottom: max(260px, 38vh);
+    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .myspace-page .myspace-right::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  .myspace-page .myspace-right > .info-card {
+    scroll-margin-top: 0;
+  }
 }
 
-.form-group input:focus, 
-.form-group select:focus, 
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+/* =========================
+   GENERIC CARDS
+   ========================= */
+
+.myspace-page .panel-card,
+.myspace-page .info-card,
+.myspace-page .status-card,
+.myspace-page .sidebar-card {
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-border);
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow-soft);
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 10px;
+/* =========================
+   STATUS CARD
+   ========================= */
+
+.myspace-page .status-card {
+  padding: 18px 18px;
+}
+
+.myspace-page .status-title {
+  margin: 0 0 10px;
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .status-description {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.38;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .status-description span {
+  color: var(--pp-text);
   font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.btn-primary:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+.myspace-page .status-dropdown-wrap {
+  position: relative;
 }
 
-.btn-secondary {
-  background: white;
-  color: #64748b;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
-  cursor: pointer;
-}
-
-.btn-secondary:hover {
-  background: #f8fafc;
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.btn-danger:hover {
-  background: #dc2626;
-}
-
-/* Profile Picture Upload */
-.profile-picture-upload {
-  border: 2px dashed #e2e8f0;
+.myspace-page .status-select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--pp-border-strong);
   border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.profile-picture-preview {
+  background: #fff;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.profile-picture-actions {
+.myspace-page .status-select:hover {
+  border-color: var(--pp-primary);
+  background: var(--pp-surface-2);
+}
+
+.myspace-page .status-select.open {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.myspace-page .status-select-left {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: #64748b;
+.myspace-page .status-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  flex-shrink: 0;
 }
 
-.upload-placeholder p {
+.myspace-page .status-dot.red {
+  background: #e05252;
+}
+
+.myspace-page .status-dot.blue {
+  background: #2d9cdb;
+}
+
+.myspace-page .status-dot.green {
+  background: #27ae60;
+}
+
+.myspace-page .status-select-text {
+  font-size: 16px;
+  color: var(--pp-text);
   font-weight: 600;
-  margin: 0;
 }
 
-.upload-placeholder small {
+.myspace-page .status-chevron {
   font-size: 14px;
-  margin: 0;
+  color: var(--pp-text-soft);
 }
 
-/* Gender Options */
-.gender-options {
+.myspace-page .status-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  border: 1px solid var(--pp-border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--pp-shadow);
+  z-index: 30;
+  overflow: hidden;
+}
+
+.myspace-page .status-dropdown-option {
+  width: 100%;
+  border: none;
+  background: #fff;
+  text-align: left;
+  padding: 14px;
+  cursor: pointer;
+  display: block;
+}
+
+.myspace-page .status-dropdown-option:hover {
+  background: var(--pp-primary-soft);
+}
+
+.myspace-page .status-dropdown-option.selected {
+  background: #f3f8ff;
+}
+
+.myspace-page .status-dropdown-option-top {
   display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.myspace-page .status-dropdown-option-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pp-text);
+}
+
+.myspace-page .status-dropdown-option-description {
+  margin: 10px 0 0 23px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pp-text-muted);
+}
+
+.myspace-page .status-note {
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--pp-text-muted);
+}
+
+.myspace-page .status-note-icon {
+  font-size: 24px;
+  color: var(--pp-primary-2);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.myspace-page .status-note p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.38;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.myspace-page .sidebar-card {
+  overflow: hidden;
+}
+
+.myspace-page .sidebar-card-title {
+  margin: 0;
+  padding: 16px 18px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+}
+
+.myspace-page .sidebar-link {
+  text-decoration: none;
+  color: var(--pp-text-soft);
+  font-size: 15.5px;
+  line-height: 1.28;
+  padding: 11px 18px;
+  border-left: 4px solid transparent;
+  transition: 0.2s ease;
+}
+
+.myspace-page .sidebar-link:hover {
+  background: #f6faff;
+  color: var(--pp-text);
+}
+
+.myspace-page .sidebar-link.active {
+  background: #eef6ff;
+  color: var(--pp-primary-2);
+  font-weight: 700;
+  border-left-color: var(--pp-primary);
+}
+
+/* =========================
+   OVERVIEW
+   ========================= */
+
+.myspace-page .overview-panel {
+  padding: 26px;
+}
+
+.myspace-page .overview-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
   gap: 20px;
 }
 
-.radio-option {
+.myspace-page .overview-completion-card,
+.myspace-page .overview-action-card {
+  min-height: 170px;
+  border: 1px solid var(--pp-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.myspace-page .overview-completion-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-weight: 500;
+  gap: 20px;
+  padding: 22px;
 }
 
-.radio-option input[type="radio"] {
-  accent-color: var(--primary);
+.myspace-page .overview-progress-ring {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--pp-primary) 0deg var(--progress-deg),
+    #dde8f5 var(--progress-deg) 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Other Assets */
-.other-assets-links {
+.myspace-page .overview-progress-ring-inner {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #e6eef8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.myspace-page .overview-progress-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .overview-completion-text h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .overview-completion-text p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .overview-action-card {
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.asset-link {
+.myspace-page .overview-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pp-shadow);
+  border-color: #bcd5f5;
+}
+
+.myspace-page .overview-action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pp-primary) 0%, #35a8ff 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.myspace-page .overview-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.myspace-page .overview-action-text span {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .overview-action-text small {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pp-text-soft);
+}
+
+/* =========================
+   PROFILE SUMMARY
+   ========================= */
+
+.myspace-page .profile-panel {
+  padding: 28px;
+}
+
+.myspace-page .profile-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.myspace-page .profile-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+}
+
+.myspace-page .profile-avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--pp-border);
+  background: linear-gradient(135deg, #eff5fb 0%, #e1ebf8 100%);
+}
+
+.myspace-page .profile-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  color: #5d7090;
+}
+
+.myspace-page .profile-heading-block {
+  min-width: 0;
+  flex: 1;
+  padding-top: 4px;
+}
+
+.myspace-page .profile-name-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.myspace-page .profile-name-line h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .profile-complete-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--pp-warning-soft);
+  color: #8a5a00;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.myspace-page .profile-headline-empty {
+  margin: 10px 0 0;
+  color: var(--pp-text-soft);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.myspace-page .edit-profile-btn {
+  min-width: 96px;
+  height: 44px;
+  border: 1px solid var(--pp-border-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--pp-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: 0.2s ease;
+}
+
+.myspace-page .edit-profile-btn:hover {
+  background: var(--pp-primary-soft);
+  border-color: var(--pp-primary);
+}
+
+.myspace-page .profile-details-grid {
+  width: 100%;
+  padding-left: 92px;
+  margin-top: 4px;
+}
+
+.myspace-page .profile-details-grid.two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 56px;
+}
+
+.myspace-page .profile-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.myspace-page .profile-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--pp-text);
+}
+
+.myspace-page .profile-break {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myspace-page .profile-detail.muted {
+  color: var(--pp-text-muted);
+}
+
+.myspace-page .profile-detail-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--pp-primary-2);
+}
+
+.myspace-page .profile-assets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-left: 92px;
+  margin-top: 18px;
+}
+
+.myspace-page .profile-assets-row-reset {
+  padding-left: 0;
+}
+
+.myspace-page .profile-asset-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: var(--pp-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #d7e6fb;
+  transition: 0.2s ease;
+}
+
+.myspace-page .profile-asset-link:hover {
+  background: #e5f0ff;
+  border-color: #bdd7fb;
+}
+
+/* =========================
+   SECTIONS
+   ========================= */
+
+.myspace-page .info-card {
+  min-height: 170px;
+  padding: 32px;
+  scroll-margin-top: 120px;
+}
+
+.myspace-page .info-card-content {
+  min-width: 0;
+}
+
+.myspace-page .info-card-title-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #1e293b;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
-.asset-link:hover {
-  background: #e2e8f0;
+.myspace-page .info-card-title-row h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .status-badge-soft {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #eef3f8;
+  color: var(--pp-text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.myspace-page .info-card-content p {
+  margin: 0;
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .add-btn {
+  min-width: 88px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--pp-primary) 0%, #35a8ff 100%);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 10px 18px rgba(38, 132, 255, 0.18);
+}
+
+.myspace-page .add-btn:hover {
+  filter: brightness(0.98);
   transform: translateY(-1px);
 }
 
-.asset-link svg {
-  color: var(--primary);
-}
-
-/* Form Help Text */
-.form-help {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 4px;
+.myspace-page .target-job-summary-card {
   display: block;
+  min-height: auto;
 }
 
-.field-error {
-  font-size: 12px;
-  color: #dc2626;
-  margin-top: 6px;
-  display: block;
+.myspace-page .target-job-summary-subtitle {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pp-text-soft);
 }
 
-.form-counter {
-  text-align: right;
-}
-
-.suggestion-list {
+.myspace-page .target-job-empty-wrap,
+.myspace-page .target-job-summary-top,
+.myspace-page .work-experience-summary-top,
+.myspace-page .skills-summary-top,
+.myspace-page .languages-summary-top,
+.myspace-page .education-summary-top,
+.myspace-page .other-assets-summary-top {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.suggestion-chip {
-  border: 1px solid #cbd5e1;
-  background: white;
-  color: #334155;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.suggestion-chip:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: #eff6ff;
-}
-/* Advanced Form Elements */
-.remote-work-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.remote-option-card {
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: white;
-}
-
-.remote-option-card:hover {
-  border-color: var(--primary);
-  background: #f8fafc;
-}
-
-.remote-option-card.active {
-  border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.05);
-  box-shadow: 0 0 0 1px var(--primary);
-}
-
-.remote-option-card h4 {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: #1e293b;
-}
-
-.remote-option-card p {
-  font-size: 12px;
-  color: #64748b;
-  margin: 0;
-}
-
-.experience-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.exp-pill {
-  padding: 8px 16px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.exp-pill:hover {
-  background: #e2e8f0;
-}
-
-.exp-pill.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-/* List Management (Work/Edu) */
-.modal-list-manager {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.manager-item {
-  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
+  gap: 20px;
 }
 
-.item-info h4 {
+.myspace-page .target-job-summary-top,
+.myspace-page .work-experience-summary-top,
+.myspace-page .skills-summary-top,
+.myspace-page .languages-summary-top,
+.myspace-page .education-summary-top,
+.myspace-page .other-assets-summary-top {
+  margin-bottom: 24px;
+}
+
+.myspace-page .target-job-summary-grid {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 18px 26px;
+  align-items: start;
+  max-width: 850px;
+}
+
+.myspace-page .target-job-summary-label {
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--pp-text);
+}
+
+.myspace-page .target-job-summary-long-label {
+  line-height: 1.25;
+}
+
+.myspace-page .target-job-summary-value {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pp-text-soft);
+  min-width: 0;
+}
+
+.myspace-page .target-job-summary-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: var(--pp-text);
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 700;
+  flex-wrap: wrap;
+  border: 1px solid #d7e6fb;
+}
+
+.myspace-page .target-job-summary-tag-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  color: var(--pp-primary-2);
+}
+
+.myspace-page .target-job-summary-text {
+  max-width: 560px;
+  word-break: break-word;
+}
+
+.myspace-page .work-experience-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.myspace-page .work-experience-summary-item {
+  border: 1px solid var(--pp-border);
+  border-radius: 16px;
+  padding: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.myspace-page .work-experience-summary-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.myspace-page .work-experience-summary-topline h4 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .work-experience-summary-topline span {
+  font-size: 14px;
+  color: var(--pp-text-muted);
+  white-space: nowrap;
+}
+
+.myspace-page .work-experience-summary-company {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--pp-text);
+  font-weight: 700;
+}
+
+.myspace-page .work-experience-summary-meta {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--pp-text-muted);
+}
+
+.myspace-page .work-experience-summary-description {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--pp-text-soft);
+  white-space: pre-wrap;
+}
+
+.myspace-page .skills-summary-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.myspace-page .skills-summary-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: var(--pp-text);
+  border: 1px solid #d7e6fb;
   font-size: 14px;
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
-.item-info p {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.item-actions {
+.myspace-page .other-assets-links-list {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: none;
+/* =========================
+   MODALS
+   ========================= */
+
+.myspace-page .profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 24, 42, 0.36);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 96px 24px 24px;
+  overflow-y: auto;
+  z-index: 2000;
+}
+
+.myspace-page .profile-modal {
+  width: min(820px, 100%);
+  max-height: calc(100vh - 120px);
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--pp-border);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 50px rgba(19, 56, 104, 0.18);
+}
+
+.myspace-page .work-experience-modal {
+  width: min(980px, 100%);
+}
+
+.myspace-page .education-modal,
+.myspace-page .target-job-modal {
+  width: min(900px, 100%);
+}
+
+.myspace-page .skills-modal,
+.myspace-page .languages-modal,
+.myspace-page .other-assets-modal {
+  width: min(820px, 100%);
+}
+
+.myspace-page .profile-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 28px 12px;
+  border-bottom: 1px solid #edf2f8;
+}
+
+.myspace-page .profile-modal-header h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .profile-modal-header p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .profile-modal-close {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--pp-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--pp-text-soft);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: 0.2s ease;
+}
+
+.myspace-page .profile-modal-close:hover {
+  background: #f7fbff;
+  border-color: var(--pp-primary);
+  color: var(--pp-primary-2);
+}
+
+.myspace-page .profile-modal-body {
+  padding: 18px 28px 22px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.myspace-page .profile-modal-footer {
+  padding: 18px 28px 24px;
+  border-top: 1px solid #edf2f8;
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 10px;
 }
 
-.edit-btn { background: #eff6ff; color: #2563eb; }
-.delete-btn { background: #fef2f2; color: #ef4444; }
+.myspace-page .profile-form-grid,
+.myspace-page .target-job-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+}
 
-.add-list-item-btn {
-  width: 100%;
-  padding: 12px;
-  background: white;
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  color: #64748b;
+.myspace-page .profile-form-group {
+  min-width: 0;
+}
+
+.myspace-page .profile-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.myspace-page .profile-form-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 15px;
   font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
+  color: var(--pp-text);
 }
 
-.add-list-item-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: #f8fafc;
+.myspace-page .profile-form-label.required::after {
+  content: " *";
+  color: var(--pp-primary);
+  font-weight: 800;
 }
 
-/* Empty State Illustrations */
-.empty-state-container {
+.myspace-page .profile-form-group input,
+.myspace-page .target-job-select,
+.myspace-page .target-job-textarea,
+.myspace-page .skills-search-input,
+.myspace-page .languages-search-input {
+  width: 100%;
+  border: 1px solid var(--pp-border-strong);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--pp-text);
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.myspace-page .profile-form-group input,
+.myspace-page .target-job-select,
+.myspace-page .skills-search-input,
+.myspace-page .languages-search-input {
+  height: 46px;
+  padding: 0 14px;
+}
+
+.myspace-page .target-job-textarea {
+  min-height: 138px;
+  padding: 14px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.myspace-page .profile-form-group input:focus,
+.myspace-page .target-job-select:focus,
+.myspace-page .target-job-textarea:focus,
+.myspace-page .skills-search-input:focus,
+.myspace-page .languages-search-input:focus {
+  border-color: var(--pp-primary);
+  box-shadow: 0 0 0 4px rgba(38, 132, 255, 0.12);
+}
+
+.myspace-page .profile-form-group input.input-error,
+.myspace-page .target-job-textarea.input-error {
+  border-color: var(--pp-danger);
+}
+
+.myspace-page .profile-form-help {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--pp-text-muted);
+  line-height: 1.4;
+}
+
+.myspace-page .profile-field-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--pp-danger);
+  line-height: 1.35;
+}
+
+.myspace-page .profile-input-icon-wrap {
+  position: relative;
+}
+
+.myspace-page .profile-input-icon-wrap input {
+  padding-left: 42px;
+}
+
+.myspace-page .profile-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: var(--pp-text-muted);
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.myspace-page .profile-picture-box {
+  border: 1px dashed var(--pp-border-strong);
+  border-radius: 16px;
+  min-height: 220px;
+  padding: 18px;
+  position: relative;
+  background: linear-gradient(180deg, #fbfdff 0%, #f5f9ff 100%);
+}
+
+.myspace-page .profile-picture-empty-state {
+  min-height: 180px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 40px 20px;
+  gap: 8px;
 }
 
-.illustration-box {
-  width: 120px;
-  height: 120px;
-  background: #f1f5f9;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  margin-bottom: 20px;
-  color: var(--primary);
-  opacity: 0.8;
+.myspace-page .profile-picture-empty-state h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--pp-text);
 }
 
-.empty-state-container h4 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
+.myspace-page .profile-picture-empty-state p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: var(--pp-text-soft);
 }
 
-.empty-state-container p {
-  font-size: 13px;
-  color: #64748b;
-  max-width: 250px;
-}
-
-/* Search Box */
-.search-input-wrapper {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.search-input-wrapper input {
-  padding-left: 40px;
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-}
-
-/* Tags and Badges */
-.recommended-tag {
-  font-size: 10px;
-  background: #f0fdf4;
-  color: #16a34a;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 700;
-  margin-left: 8px;
-  text-transform: uppercase;
-}
-
-/* Enhanced Radio Option Cards */
-.radio-option-card {
-  flex: 1;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
+.myspace-page .profile-picture-choose-btn,
+.myspace-page .modal-save-btn,
+.myspace-page .work-experience-primary-btn {
+  min-width: 100px;
+  height: 44px;
+  border: none;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  background: linear-gradient(135deg, var(--pp-primary) 0%, #35a8ff 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  background: white;
+  padding: 0 18px;
+  transition: 0.2s ease;
 }
 
-.radio-option-card:hover { border-color: var(--primary); }
-
-.radio-option-card.active {
-  border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.05);
+.myspace-page .profile-picture-choose-btn:hover,
+.myspace-page .modal-save-btn:hover,
+.myspace-page .work-experience-primary-btn:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
 }
 
-.radio-circle {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #cbd5e1;
-  border-radius: 50%;
+.myspace-page .modal-cancel-btn,
+.myspace-page .work-experience-add-another-btn {
+  min-width: 96px;
+  height: 44px;
+  border: 1px solid var(--pp-border-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--pp-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 16px;
+  transition: 0.2s ease;
+}
+
+.myspace-page .modal-cancel-btn:hover,
+.myspace-page .work-experience-add-another-btn:hover {
+  background: #f7fbff;
+  border-color: var(--pp-primary);
+}
+
+.myspace-page .profile-picture-filled-state {
+  position: relative;
+  min-height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.radio-option-card.active .radio-circle {
-  border-color: var(--primary);
+.myspace-page .profile-picture-preview {
+  width: 194px;
+  height: 194px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid var(--pp-border);
 }
 
-.radio-circle .inner {
-  width: 10px;
-  height: 10px;
-  background: var(--primary);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.radio-option-card.active .radio-circle .inner {
-  opacity: 1;
-}
-
-.checkbox-label {
+.myspace-page .profile-picture-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.myspace-page .profile-picture-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--pp-border-strong);
+  background: #fff;
+  color: var(--pp-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
+}
+
+.myspace-page .profile-picture-icon-btn.delete {
+  border: none;
+  background: var(--pp-danger);
+  color: #fff;
+}
+
+.myspace-page .profile-hidden-file-input {
+  display: none;
+}
+
+.myspace-page .profile-gender-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-top: 6px;
+}
+
+.myspace-page .profile-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--pp-text);
+}
+
+.myspace-page .profile-radio-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--pp-primary);
+}
+
+.myspace-page .recommended-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--pp-primary-soft);
+  color: var(--pp-primary-2);
+  font-size: 12px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.myspace-page .target-job-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.myspace-page .target-job-checkbox-card,
+.myspace-page .target-job-experience-option {
+  border: 1px solid var(--pp-border-strong);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.myspace-page .target-job-checkbox-card:hover,
+.myspace-page .target-job-experience-option:hover {
+  border-color: var(--pp-primary);
+  background: #f8fbff;
+}
+
+.myspace-page .target-job-checkbox-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 12px;
+}
+
+.myspace-page .target-job-checkbox-card input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--pp-primary);
+}
+
+.myspace-page .target-job-checkbox-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pp-text);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.myspace-page .target-job-checkbox-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .target-job-experience-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.myspace-page .target-job-experience-option {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.myspace-page .target-job-experience-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--pp-primary);
+}
+
+.myspace-page .target-job-experience-option span {
+  font-size: 15px;
+  color: var(--pp-text);
+}
+
+/* =========================
+   WORK EXPERIENCE / EDUCATION MODAL LIST
+   ========================= */
+
+.myspace-page .work-experience-saved-list {
+  margin-bottom: 28px;
+  border: 1px solid var(--pp-border);
+  border-radius: 16px;
+  padding: 18px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f6faff 100%);
+}
+
+.myspace-page .work-experience-saved-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.myspace-page .work-experience-saved-list-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .work-experience-saved-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.myspace-page .work-experience-saved-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--pp-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.myspace-page .work-experience-saved-item-main h4 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .work-experience-saved-item-main p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .work-experience-saved-item-main span {
+  font-size: 13px;
+  color: var(--pp-text-muted);
+}
+
+.myspace-page .work-experience-saved-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.myspace-page .work-experience-form-card {
+  border-top: 1px solid #edf2f8;
+  padding-top: 24px;
+}
+
+.myspace-page .work-experience-form-header {
+  margin-bottom: 16px;
+}
+
+.myspace-page .work-experience-form-header h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .work-experience-form-header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pp-text-soft);
+}
+
+.myspace-page .work-experience-form-actions {
+  margin-top: 18px;
+}
+
+.myspace-page .work-experience-primary-btn {
+  min-width: 170px;
+}
+
+/* =========================
+   SKILLS / LANGUAGES
+   ========================= */
+
+.myspace-page .skills-search-wrap {
+  margin-bottom: 20px;
+}
+
+.myspace-page .skills-selected-wrap h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pp-text);
+}
+
+.myspace-page .skills-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.myspace-page .skills-selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef5ff;
+  border: 1px solid #d7e6fb;
+  color: var(--pp-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.myspace-page .skills-remove-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--pp-text-soft);
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.myspace-page .skills-suggestions-wrap {
+  margin-bottom: 22px;
+}
+
+.myspace-page .skills-suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.myspace-page .skills-suggestion-item {
+  border: 1px solid var(--pp-border-strong);
+  background: #fff;
+  color: var(--pp-text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.myspace-page .skills-suggestion-item:hover {
+  border-color: var(--pp-primary);
+  background: var(--pp-primary-soft);
+  color: var(--pp-primary-2);
+}
+
+.myspace-page .skills-empty-message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pp-text-muted);
+}
+
+/* ===== ORIGINAL MYSPACE-STYLE SKILLS MODAL ===== */
+
+.myspace-page .skills-modal {
+  width: min(760px, 100%);
+}
+
+.myspace-page .skills-modal-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.myspace-page .skills-search-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #e6d88c;
+  border-radius: 2px;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 16px;
+  color: #111111;
+  outline: none;
+}
+
+.myspace-page .skills-search-input::placeholder {
+  color: #a1a1a1;
+}
+
+.myspace-page .skills-modal-section-title {
+  margin: 6px 0 22px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111111;
+  text-transform: uppercase;
+}
+
+.myspace-page .skills-empty-state {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 20px 0;
+}
+
+.myspace-page .skills-empty-illustration {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: #f3efe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.myspace-page .skills-empty-illustration-box {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #111111;
+  border-radius: 20px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-6deg);
+}
+
+.myspace-page .skills-empty-illustration-box span {
+  font-size: 42px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.myspace-page .skills-empty-state h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #050505;
+}
+
+.myspace-page .skills-empty-state p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #111111;
+}
+
+.myspace-page .skills-selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 12px;
+}
+
+.myspace-page .skills-selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 17px;
+  line-height: 1.35;
+  color: #111111;
+}
+
+.myspace-page .skills-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #111111;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.myspace-page .skills-suggestions-dropdown {
+  position: absolute;
+  top: 104px;
+  left: 36px;
+  right: 36px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #d9d5cf;
+  border-top: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 8;
+}
+
+.myspace-page .skills-suggestion-item {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #111111;
   cursor: pointer;
 }
 
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  min-height: 16px;
-  padding: 0;
+.myspace-page .skills-suggestion-item:hover {
+  background: #f7f5f1;
+}
+
+/* ===== ORIGINAL MYSPACE-STYLE LANGUAGES MODAL ===== */
+
+.myspace-page .languages-modal {
+  width: min(760px, 100%);
+}
+
+.myspace-page .languages-modal-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.myspace-page .languages-search-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #e6d88c;
+  border-radius: 2px;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 16px;
+  color: #111111;
+  outline: none;
+}
+
+.myspace-page .languages-search-input::placeholder {
+  color: #a1a1a1;
+}
+
+.myspace-page .languages-modal-section-title {
+  margin: 6px 0 22px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111111;
+  text-transform: uppercase;
+}
+
+.myspace-page .languages-empty-state {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 20px 0;
+}
+
+.myspace-page .languages-empty-illustration {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: #f3efe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.myspace-page .languages-empty-illustration-bubble {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #111111;
+  border-radius: 28px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.myspace-page .languages-empty-illustration-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 28px;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-left: 2px solid #111111;
+  border-bottom: 2px solid #111111;
+  transform: rotate(-35deg);
+}
+
+.myspace-page .languages-empty-illustration-bubble span {
+  font-size: 34px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.myspace-page .languages-empty-state h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #050505;
+}
+
+.myspace-page .languages-empty-state p {
   margin: 0;
-  flex: 0 0 16px;
-  border-radius: 4px;
-  accent-color: var(--primary);
-  transform: translateY(1px);
+  font-size: 16px;
+  line-height: 1.45;
+  color: #111111;
+}
+
+.myspace-page .languages-selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 12px;
+}
+
+.myspace-page .languages-selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 17px;
+  line-height: 1.35;
+  color: #111111;
+}
+
+.myspace-page .languages-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #111111;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.myspace-page .languages-suggestions-dropdown {
+  position: absolute;
+  top: 104px;
+  left: 36px;
+  right: 36px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #d9d5cf;
+  border-top: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 8;
+}
+
+.myspace-page .languages-suggestion-item {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #111111;
+  cursor: pointer;
+}
+
+.myspace-page .languages-suggestion-item:hover {
+  background: #f7f5f1;
+}
+
+.myspace-page .skills-modal-body,
+.myspace-page .languages-modal-body {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow-y: visible;
+}
+
+.myspace-page .skills-empty-state,
+.myspace-page .languages-empty-state {
+  min-height: 240px;
+  padding: 8px 20px 0;
+}
+
+.myspace-page .skills-empty-illustration,
+.myspace-page .languages-empty-illustration {
+  width: 180px;
+  height: 180px;
+  margin-bottom: 18px;
+}
+
+.myspace-page .skills-empty-illustration-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 18px;
+}
+
+.myspace-page .languages-empty-illustration-bubble {
+  width: 100px;
+  height: 100px;
+  border-radius: 24px;
+}
+
+.myspace-page .languages-empty-illustration-bubble::after {
+  bottom: -10px;
+  left: 22px;
+  width: 18px;
+  height: 18px;
+}
+
+.myspace-page .skills-empty-state h3,
+.myspace-page .languages-empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+@media (max-width: 1200px) {
+  .myspace-page .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .myspace-page .target-job-checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .myspace-page .target-job-experience-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .myspace-page .target-job-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .myspace-page .profile-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .myspace-page .profile-details-grid {
+    padding-left: 0;
+    margin-top: 12px;
+  }
+
+  .myspace-page .profile-assets-row {
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 992px) {
-  .prof-modal {
-    max-width: min(700px, calc(100vw - 24px));
-    max-height: calc(100vh - 24px);
+  .myspace-page {
+    padding-top: 104px;
   }
 
-  .modal-body {
-    padding: 24px;
-    max-height: calc(100vh - 240px);
+  .myspace-page .myspace-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .myspace-page .myspace-left {
+    position: static;
+    top: auto;
+    max-height: none;
+  }
+
+  .myspace-page .fixed-sidebar {
+    max-height: none;
+  }
+
+  .myspace-page .status-card {
+    padding: 22px 20px;
+  }
+
+  .myspace-page .status-title {
+    margin-bottom: 14px;
+    font-size: 22px;
+  }
+
+  .myspace-page .status-description {
+    margin-bottom: 18px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .myspace-page .status-note {
+    margin-top: 18px;
+  }
+
+  .myspace-page .status-note-icon {
+    font-size: 28px;
+  }
+
+  .myspace-page .status-note p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .myspace-page .sidebar-card-title {
+    padding: 18px 18px 12px;
+  }
+
+  .myspace-page .sidebar-nav {
+    padding-bottom: 10px;
+  }
+
+  .myspace-page .sidebar-link {
+    font-size: 16px;
+    line-height: 1.35;
+    padding: 14px 18px;
+  }
+
+  .myspace-page .profile-form-grid,
+  .myspace-page .target-job-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+ .myspace-page .profile-modal,
+ .myspace-page .work-experience-modal,
+ .myspace-page .education-modal,
+ .myspace-page .target-job-modal,
+ .myspace-page .skills-modal,
+ .myspace-page .languages-modal,
+ .myspace-page .other-assets-modal {
+  width: 100%;
+  max-height: calc(100vh - 110px);
+ }
+
+  .myspace-page .target-job-empty-wrap,
+  .myspace-page .target-job-summary-top,
+  .myspace-page .work-experience-summary-top,
+  .myspace-page .skills-summary-top,
+  .myspace-page .languages-summary-top,
+  .myspace-page .education-summary-top,
+  .myspace-page .other-assets-summary-top,
+  .myspace-page .work-experience-saved-list-header,
+  .myspace-page .work-experience-saved-item,
+  .myspace-page .work-experience-summary-topline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .myspace-page .profile-modal-overlay {
+  padding: 88px 12px 12px;
+  }
+
+  .myspace-page .work-experience-saved-item-actions {
+    align-self: flex-start;
+  }
+
+  .myspace-page .profile-details-grid.two-columns {
+    grid-template-columns: 1fr;
+    row-gap: 14px;
   }
 }
 
 @media (max-width: 768px) {
-  .prof-modal {
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
-    min-height: 0;
+  .myspace-page {
+    padding: 96px 0 36px;
+  }
+
+  .myspace-page .container {
+    width: calc(100% - 20px);
+  }
+
+  .myspace-page .status-card,
+  .myspace-page .overview-panel,
+  .myspace-page .profile-panel,
+  .myspace-page .info-card {
+    padding: 20px 18px;
     border-radius: 16px;
   }
 
-  .modal-header,
-  .modal-footer,
-  .modal-body {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .modal-header {
-    padding-top: 16px;
-    padding-bottom: 16px;
-  }
-
-  .modal-body {
-    padding-top: 18px;
-    padding-bottom: 18px;
-    max-height: calc(100vh - 210px);
-  }
-
-  .modal-footer {
-    padding-top: 14px;
-    padding-bottom: 14px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
+  .myspace-page .profile-main {
+    flex-direction: column;
     gap: 14px;
   }
 
-  .form-group.full-width {
-    grid-column: auto;
+  .myspace-page .profile-avatar {
+    width: 68px;
+    height: 68px;
   }
 
-  .form-group {
-    margin-bottom: 10px;
+  .myspace-page .profile-name-line h2,
+  .myspace-page .info-card-title-row h2,
+  .myspace-page .status-title {
+    font-size: 21px;
   }
 
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    min-height: 44px;
-    padding: 10px 12px;
+  .myspace-page .overview-completion-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .form-group textarea {
-    min-height: 108px;
+  .myspace-page .overview-action-text span {
+    font-size: 17px;
+  }
+
+  .myspace-page .target-job-experience-row {
+    grid-template-columns: 1fr;
+  }
+
+  .myspace-page .profile-modal-header,
+  .myspace-page .profile-modal-body,
+  .myspace-page .profile-modal-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .myspace-page .profile-picture-preview {
+    width: 150px;
+    height: 150px;
+  }
+
+  .myspace-page .profile-gender-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .myspace-page .edit-profile-btn,
+  .myspace-page .add-btn,
+  .myspace-page .modal-save-btn,
+  .myspace-page .modal-cancel-btn,
+  .myspace-page .work-experience-add-another-btn,
+  .myspace-page .work-experience-primary-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

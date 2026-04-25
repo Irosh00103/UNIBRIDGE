@@ -13,29 +13,155 @@ export const portalCategories = [
   { slug: "hr-recruitment-jobs", name: "HR / Recruitment Jobs", accent: "hr", order: 12 },
 ];
 
-export const mapJobToPortalCategory = (job) => {
-  const text = [
-    job.title || "",
-    job.category || "",
-    job.qualification || "",
-    job.experience || "",
-    job.workMode || "",
-    ...(job.skills || []),
-  ]
+const normalizeJobText = (...values) =>
+  values
+    .flatMap((value) => {
+      if (Array.isArray(value)) return value;
+      return [value];
+    })
+    .filter(Boolean)
     .join(" ")
     .toLowerCase();
 
-  if (text.includes("education") || text.includes("training") || text.includes("academic")) return "education-training-jobs";
-  if (text.includes("frontend") || text.includes("software") || text.includes("react") || text.includes("qa") || text.includes("quality assurance") || text.includes("cyber") || text.includes("security") || text.includes("data") || text.includes("analytics") || text.includes("ui/ux") || text.includes("design")) return "it-software-jobs";
-  if (text.includes("marketing") || text.includes("communication") || text.includes("social media") || text.includes("content")) return "marketing-communication-jobs";
-  if (text.includes("finance") || text.includes("accounting") || text.includes("operations")) return "accounting-finance-jobs";
-  if (text.includes("banking")) return "finance-banking-jobs";
-  if (text.includes("hr") || text.includes("recruitment")) return "hr-recruitment-jobs";
-  if (text.includes("customer care") || text.includes("call center")) return "customer-care-call-center-jobs";
-  if (text.includes("administrative") || text.includes("secretarial")) return "administrative-secretarial-jobs";
-  if (text.includes("production") || text.includes("manufacturing")) return "production-manufacturing-jobs";
-  if (text.includes("engineering") || text.includes("construction")) return "construction-engineering-jobs";
-  if (text.includes("sales") || text.includes("business development")) return "sales-business-development-jobs";
+const hasAnySignal = (text, signals) => signals.some((signal) => text.includes(signal));
+
+export const mapJobToPortalCategory = (job) => {
+  const titleText = normalizeJobText(job.title);
+  const categoryText = normalizeJobText(job.category);
+  const primaryText = normalizeJobText(job.title, job.category);
+  const supportText = normalizeJobText(
+    job.qualification,
+    job.experience,
+    job.workMode,
+    job.overview,
+    job.description,
+    job.responsibilities,
+    job.requirements,
+    job.skills
+  );
+  const fullText = normalizeJobText(primaryText, supportText);
+
+  const softwareRoleSignals = [
+    "software engineer",
+    "software engineering",
+    "full stack engineer",
+    "full stack developer",
+    "frontend engineer",
+    "frontend developer",
+    "backend engineer",
+    "backend developer",
+    "web developer",
+    "mobile developer",
+    "app developer",
+    "devops engineer",
+    "qa engineer",
+    "data engineer",
+    "data analyst",
+    "ui/ux",
+    "ui ux",
+  ];
+
+  const softwareSignals = [
+    "frontend",
+    "backend",
+    "full stack",
+    "software",
+    "developer",
+    "programmer",
+    "react",
+    "node",
+    "javascript",
+    "java",
+    "python",
+    "qa",
+    "quality assurance",
+    "cyber",
+    "security",
+    "data analyst",
+    "data science",
+    "analytics",
+    "ui/ux",
+    "web",
+    "mobile app",
+    "devops",
+    "cloud",
+    "api",
+    "database",
+  ];
+
+  const physicalEngineeringRoleSignals = [
+    "civil engineer",
+    "civil engineering",
+    "electrical engineer",
+    "electrical engineering",
+    "electric engineer",
+    "mechanical engineer",
+    "mechanical engineering",
+    "structural engineer",
+    "structural engineering",
+    "site engineer",
+    "project engineer",
+    "quantity surveyor",
+    "mep engineer",
+  ];
+
+  const physicalEngineeringSignals = [
+    "electrical",
+    "electric",
+    "civil",
+    "mechanical",
+    "construction",
+    "structural",
+    "site supervisor",
+    "site engineer",
+    "quantity surveyor",
+    "autocad",
+    "mep",
+    "hvac",
+    "plumbing",
+    "estimating engineer",
+    "project engineer",
+  ];
+
+  const primaryHasSoftwareRole = hasAnySignal(primaryText, softwareRoleSignals);
+  const primaryHasPhysicalEngineeringRole = hasAnySignal(
+    primaryText,
+    physicalEngineeringRoleSignals
+  );
+  const primaryHasPhysicalEngineeringSignals = hasAnySignal(
+    primaryText,
+    physicalEngineeringSignals
+  );
+  const fullHasSoftwareSignals = hasAnySignal(fullText, softwareSignals);
+  const fullHasPhysicalEngineeringSignals = hasAnySignal(
+    fullText,
+    physicalEngineeringSignals
+  );
+
+  if (primaryHasSoftwareRole) return "it-software-jobs";
+  if (primaryHasPhysicalEngineeringRole || primaryHasPhysicalEngineeringSignals) {
+    return "construction-engineering-jobs";
+  }
+
+  if (fullHasSoftwareSignals) return "it-software-jobs";
+  if (
+    fullHasPhysicalEngineeringSignals ||
+    (categoryText.includes("engineering") && !fullHasSoftwareSignals) ||
+    ((titleText.includes("engineer") || titleText.includes("engineering")) &&
+      !primaryHasSoftwareRole &&
+      !fullHasSoftwareSignals)
+  ) {
+    return "construction-engineering-jobs";
+  }
+  if (fullText.includes("education") || fullText.includes("training") || fullText.includes("academic")) return "education-training-jobs";
+  if (fullText.includes("marketing") || fullText.includes("communication") || fullText.includes("social media") || fullText.includes("content")) return "marketing-communication-jobs";
+  if (fullText.includes("finance") || fullText.includes("accounting") || fullText.includes("operations")) return "accounting-finance-jobs";
+  if (fullText.includes("banking")) return "finance-banking-jobs";
+  if (fullText.includes("hr") || fullText.includes("recruitment")) return "hr-recruitment-jobs";
+  if (fullText.includes("customer care") || fullText.includes("call center")) return "customer-care-call-center-jobs";
+  if (fullText.includes("administrative") || fullText.includes("secretarial")) return "administrative-secretarial-jobs";
+  if (fullText.includes("production") || fullText.includes("manufacturing")) return "production-manufacturing-jobs";
+  if (fullText.includes("sales") || fullText.includes("business development")) return "sales-business-development-jobs";
 
   return "other";
 };
