@@ -14,10 +14,7 @@ router.get('/portal', async (req, res) => {
     }
 });
 
-// ── Protected routes below ──
-router.use(protect);
-
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
     try {
         const jobs = await Job.find({ status: 'OPEN' }).sort({ createdAt: -1 });
         res.status(200).json({ success: true, data: jobs });
@@ -26,7 +23,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
     try {
         if (!['admin', 'employer'].includes(req.user.role)) {
             return res.status(403).json({ success: false, message: 'Employers and admins only' });
@@ -83,7 +80,41 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.patch('/:id/close', async (req, res) => {
+// ✏️ UPDATE JOB
+router.put('/:id', protect, async (req, res) => {
+    try {
+        const job = await Job.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: 'Job not found' });
+        }
+
+        res.status(200).json({ success: true, data: job });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ❌ DELETE JOB
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const job = await Job.findByIdAndDelete(req.params.id);
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: 'Job not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Job deleted' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+router.patch('/:id/close', protect,async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Admins only' });

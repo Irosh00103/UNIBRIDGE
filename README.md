@@ -20,6 +20,7 @@ Integrated Academic, Career & Peer Learning Platform
 | --- | --- | --- |
 | Student | student@test.com | test123 |
 | Employer | employer@test.com | test123 |
+| Employer | employer@test.com | test123 |
 
 ## Demo Flow
 - Login as student → browse materials → upload material → view jobs → apply to job → check my applications → create kuppi session
